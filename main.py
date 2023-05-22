@@ -58,16 +58,15 @@ def drawgrid():  # drawing the board with lines
 
 def result():  # to get results and print them on screen
     global draw, winner
-    message = 'hello'
+    message = ''
     if winner:
         message = winner + " won!"
     if draw:
         message = "Game Draw!"
 
     font = pygame.font.SysFont('Georgia', 70)
-    text = font.render(message, 1, (24, 154, 180))
-    # screen.fill((0, 0, 0), (0, 400, 500, 100))
-    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    text = font.render(message, 1, '#22b491')
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80))
     screen.blit(text, text_rect)
     pygame.display.update()
 
@@ -246,7 +245,7 @@ def input_to_block():  # to get the position of the coordinate clicked so that y
 
 drawgrid()  # calling the function in the main part
 font = pygame.font.SysFont('Georgia', 30)
-again = button.button(300, 300, font, 'Play Again?')
+again = button.button(400, 400, font, 'Play Again?')
 
 play = button.button(400, 300, font, 'Play')
 
@@ -257,6 +256,7 @@ bg = pygame.image.load("images/bg.jpg")
 run = True
 global playing
 playing= False
+drawGridCkeck=False
 while run:  # the game loop
     for event in pygame.event.get():
 
@@ -268,10 +268,13 @@ while run:  # the game loop
             if play.draw_button(screen):
                 playing = True
                 print('play')
-                drawgrid()
+                drawGridCkeck=True
             if playWithAi.draw_button(screen):
                 print('play with computer')
         else:
+            if drawGridCkeck:
+                drawGridCkeck=False
+                drawgrid()
             if  winner is None:
                 if (event.type == pygame.MOUSEBUTTONDOWN ):
                     input_to_block()

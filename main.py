@@ -1,37 +1,29 @@
 #                                              TIC TAC TOE
-# the algorithm
-'''
-1. make the board draw lines and get images loaded
-2. a function to get the result of the game which player won or if it was a draw
-3. a function to print these results on game screen
-4. drawing the X or O at the position choosen would contain two functions
-    a.choosing the point using the mouse
-    b. rendering the image at that box
 
-WE HAVE THESE 5 FUNCTIONS THAT WE WOULD PUT TOGETHER TO MAKE THE THE TIC TAC TOE GAME
-i. draw board function 
-ii. get results printed use font
-iii. check winning cases and strike the win line draw module
-iv. get coordinates of mouse click use mouse module
-v. put the picture at these coordinates
-'''
 
 import pygame
-
+import button
 import math
 
 pygame.init()
+
 X = 'X'
 O = 'O'
 curTurn = 'X'  # the initialised variable that stores whose turn it is
 prevTurn = 'O'
-winner = None  # to store the winner used in checkwin
 
-draw = None  # to see if it is a draw a boolean
 ROW = 10
 COL = 10
-board = [[None] * ROW for _ in range(ROW)]  # the board is a matrix basically of size  R
 
+board=[[None] * ROW for _ in range(ROW)]
+winner = None  # to store the winner used in checkwin
+draw = None  # to see if it is a draw a boolean
+def init_game():
+    global board,winner ,draw
+    board=[[None] * ROW for _ in range(ROW)]
+    winner = None  # to store the winner used in checkwin
+
+    draw = None  # to see if it is a draw a boolean
 clock = pygame.time.Clock()  # the Clock object for framerate
 WIDTH = 800
 HEIGHT = 800
@@ -167,12 +159,13 @@ def checkMajorDiagonal(row, col):
             break
         else:
             break
-    if(tail and head):
+    if (tail and head):
         return False
-    elif(cnt==5):
+    elif (cnt == 5):
         return True
     else:
         return False
+
 
 def checkMinorDiagonal(row, col):
     head = False
@@ -188,7 +181,7 @@ def checkMinorDiagonal(row, col):
         else:
             break
     for k in range(1, 6):
-        if (row + k >= ROW or col - k < 0 ): break
+        if (row + k >= ROW or col - k < 0): break
         if (board[row + k][col - k] == prevTurn):
             cnt += 1
         elif (board[row + k][col - k] == curTurn):
@@ -196,9 +189,9 @@ def checkMinorDiagonal(row, col):
             break
         else:
             break
-    if(tail and head):
+    if (tail and head):
         return False
-    elif(cnt==5):
+    elif (cnt == 5):
         return True
     else:
         return False
@@ -206,7 +199,8 @@ def checkMinorDiagonal(row, col):
 
 def wincases(row, col):  # check the winner and draw a line across how the win was
     global winner
-    if (checkVertical(row, col) or checkHorizontal(row, col) or checkMajorDiagonal(row,col) or checkMinorDiagonal(row,col)):
+    if (checkVertical(row, col) or checkHorizontal(row, col) or checkMajorDiagonal(row, col) or checkMinorDiagonal(row,
+                                                                                                                   col)):
         winner = prevTurn
         result()
 
@@ -251,18 +245,43 @@ def input_to_block():  # to get the position of the coordinate clicked so that y
 
 
 drawgrid()  # calling the function in the main part
+font = pygame.font.SysFont('Georgia', 30)
+again = button.button(300, 300, font, 'Play Again?')
 
-run=True
+play = button.button(400, 300, font, 'Play')
+
+playWithAi = button.button(400, 400, font, 'Play vs computer')
+
+bg = pygame.image.load("images/bg.jpg")
+
+run = True
+global playing
+playing= False
 while run:  # the game loop
-    if game_pause==True:
-        screen.fill(BACKGROUND)
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if(not winner):
-                input_to_block()
+        if (not playing):
+            screen.blit(bg, (0, 0))
+            if play.draw_button(screen):
+                playing = True
+                print('play')
+                drawgrid()
+            if playWithAi.draw_button(screen):
+                print('play with computer')
+        else:
+            if  winner is None:
+                if (event.type == pygame.MOUSEBUTTONDOWN ):
+                    input_to_block()
+            else:
+                if again.draw_button(screen):
+                    print('Again')
+                    screen.blit(bg, (0, 0))
+                    playing = False
+                    winner = None
+                    init_game()
 
     pygame.display.update()
     clock.tick(30)  # refresh rate

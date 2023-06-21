@@ -262,7 +262,7 @@ def min_value(row,col,deep):
     global winner,prevTurn,curTurn
 
     if wincases(row,col):
-        print('min winner',winner)
+        # print('min winner',winner)
         a=winner
         winner=None
         return dict(
@@ -296,13 +296,13 @@ def min_value(row,col,deep):
                 board[i][j]=None
                 prevTurn = ai
                 curTurn = human
-    print('min',bestScore)
+    # print('min',bestScore)
     return  bestScore
 
 def max_value(row,col,deep):
     global winner,prevTurn,curTurn
     if wincases(row,col):
-        print('max winner',winner)
+        # print('max winner',winner)
 
         a = winner
         winner = None
@@ -320,7 +320,7 @@ def max_value(row,col,deep):
         for j in range(COL):
             if board[i][j] is None:
                 board[i][j]=ai
-                print(board)
+                # print(board)
                 prevTurn = ai
                 curTurn = human
                 v= min_value(i,j,deep+1)
@@ -339,7 +339,7 @@ def max_value(row,col,deep):
                 board[i][j]=None
                 prevTurn = human
                 curTurn = ai
-    print('max',bestScore)
+    # print('max',bestScore)
 
     return  bestScore
 
@@ -347,7 +347,7 @@ def max_value(row,col,deep):
 def minimax(row,col):
     v=max_value(row,col,0)
     getimg(v['pos'][0],v['pos'][1])
-    print('minimax',v)
+    # print('minimax',v)
     return v
 
 drawgrid()  # calling the function in the main part

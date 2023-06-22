@@ -9,14 +9,10 @@ pygame.init()
 HUMAN = 'b'
 AI = 'w'
 pygame.display.set_caption("Tic Tac Toe")  # the caption\
-WIDTH = 400
-HEIGHT = 400
-CEIL=40
+WIDTH = 800
+HEIGHT = 800
 ximg = pygame.image.load("images/X.png")
-ximg=pygame.transform.scale(ximg,(40,40))
 oimg = pygame.image.load("images/O.png")
-oimg=pygame.transform.scale(oimg,(40,40))
-
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen setup
 LINE_COLOR = (228, 231, 236)
 clock = pygame.time.Clock()  # the Clock object for framerate
@@ -24,82 +20,16 @@ BACKGROUND = (254, 254, 254)
 
 move_history = []
 win = False
-caseAI = ['ww00w0', '0ww00w', 'w0w0w0', '0w00ww', '0w0w0w', 'w00ww0', '000ww0', '00w0w0', '00ww00', '000ww00', '00w0w00', '0ww000', '0www00', '0ww0w0', '0w0ww0', '00ww0w', '00w0ww', '000www', 'www000', 'ww0w00', 'w0ww00', '0ww0w0', '0w0ww0', '00www0', '00www0', '0www00', '00www00', '00ww0w0', '00w0ww0', '000www0', '0w0w0w0w', '0w0ww00w', '0w00ww0w', '0www000', '0ww0w00', '0w0ww00', '00www00', 'w0w0w0w0', 'w0ww00w0', 'w00ww0w0', '00wwww', '0w0www', '0ww0ww', '0www0w', '0www0w', '0wwww0', '0wwww0', 'w0www0', 'ww0ww0', 'www0w0', 'www0w0', 'wwww00', '0wwwww', 'wwwww0']
-caseUser =['bb00b0', '0bb00b', 'b0b0b0', '0b00bb', '0b0b0b', 'b00bb0', '000bb0', '00b0b0', '00bb00', '000bb00', '00b0b00', '0bb000', '0bbb00', '0bb0b0', '0b0bb0', '00bb0b', '00b0bb', '000bbb', 'bbb000', 'bb0b00', 'b0bb00', '0bb0b0', '0b0bb0', '00bbb0', '00bbb0', '0bbb00', '00bbb00', '00bb0b0', '00b0bb0', '000bbb0', '0b0b0b0b', '0b0bb00b', '0b00bb0b', '0bbb000', '0bb0b00', '0b0bb00', '00bbb00', 'b0b0b0b0', 'b0bb00b0', 'b00bb0b0', '00bbbb', '0b0bbb', '0bb0bb', '0bbb0b', '0bbb0b', '0bbbb0', '0bbbb0', 'b0bbb0', 'bb0bb0', 'bbb0b0', 'bbb0b0', 'bbbb00', '0bbbbb', 'bbbbb0']
-SIZE=10
-point = [
-    	4, 4, 4,4, 4, 4,
-    	8, 8, 8,
-    	8, 8, 8, 8, 8, 8, 
-    	8,
-    	8, 8, 8,
-    	8, 8, 8, 8, 8, 8, 
-    	8,
-    	500, 500, 500, 500, 500, 500, 500,
-    	500, 500, 500, 500, 500, 500, 500,
-    	1000, 1000, 1000, 1000, 1000, 1000,
-    	1000, 1000, 1000, 1000, 1000, 1000,
-    	100000,
-    	100000];
-attackScore = {0, 3, 24, 192, 1536, 12288}; 
 
-
-def evaluateState(board):
-    splitSymbol=';'
-    rem=''
-    for i in range(SIZE):
-        for j in range(SIZE):
-            rem+=board[i][j]
-        rem+=splitSymbol
-        for j in range(SIZE):
-            rem+=board[j][i]
-        rem+=splitSymbol 
-        
-    for i in range(SIZE-4):
-        for j in range(SIZE-i):
-            rem+=board[j][i+j]
-        rem+=splitSymbol  
-    for i in range(SIZE-5):
-        for j in range(SIZE-i):
-            rem+=board[i+j][j]
-        rem+=splitSymbol      
-    # check nửa trên đường chéo trái ( / )
-    for i in range(4, SIZE):
-        for j in range(i + 1):
-            rem += board[i - j][j]
-        rem += ";"
-
-    # check nửa dưới đường chéo trái ( / )
-    for i in range(SIZE - 5, 0, -1):
-        for j in range(SIZE - 1, i - 1, -1):
-            rem += board[j][i + SIZE - j - 1]
-        rem += ";\n"
-    
-    
-    find1 = ""
-    find2 = ""
-    diem = 0
-
-    # Tính điểm của trạng thái
-    for i in range(len(caseUser)):
-        find1 = caseAI[i]  # duyệt những đường chiến lược của AI
-        find2 = caseUser[i]  # duyệt những đường chiến lược của User
-        diem += point[i] * rem.count(find1)  # cộng vào điểm lượng giá của AI
-        diem -= point[i] * rem.count(find2)  # trừ đi điểm lượng giá của User
-
-    return diem
-
-     
-           
 def make_empty_board(sz):
     board = []
     for i in range(sz):
-        board.append(["0"] * sz)
+        board.append([" "] * sz)
     return board
 
 
 def is_empty(board):
-    return board == [['0'] * len(board)] * len(board)
+    return board == [[' '] * len(board)] * len(board)
 
 
 def is_in(board, y, x):
@@ -170,7 +100,7 @@ def sum_sumcol_values(sumcol):
 
 
 def score_of_list(lis, col):
-    blank = lis.count('0')
+    blank = lis.count(' ')
     filled = lis.count(col)
 
     if blank + filled < 5:
@@ -265,7 +195,7 @@ def possible_moves(board):
 
     for i in range(len(board)):
         for j in range(len(board)):
-            if board[i][j] != '0':
+            if board[i][j] != ' ':
                 taken.append((i, j))
     ''' duyệt trong hướng đi và mảng giá trị trên bàn cờ của người chơi và máy, kiểm tra nước không thể đi(trùng với 
     nước đã có trên bàn cờ)
@@ -323,7 +253,7 @@ def stupid_score(board, col, anticol, y, x):
 
     res = adv + dis
 
-    board[y][x] = '0'
+    board[y][x] = ' '
     return res
 
 
@@ -358,7 +288,6 @@ def best_move(board, col):
         anticol = 'w'
 
     movecol = (0, 0)
-    curScore=0
     maxscorecol = ''
     # kiểm tra nếu bàn cờ rỗng thì cho vị trí random nếu không thì đưa ra giá trị trên bàn cờ nên đi 
     if is_empty(board):
@@ -372,19 +301,17 @@ def best_move(board, col):
                 scorecol = stupid_score(board, col, anticol, y, x)
                 maxscorecol = scorecol
                 movecol = move
-                curScore+=scorecol
             else:
                 scorecol = stupid_score(board, col, anticol, y, x)
-                curScore+=scorecol
                 if scorecol > maxscorecol:
                     maxscorecol = scorecol
                     movecol = move
-    return scorecol
+    return movecol,maxscorecol
 
 ##Graphics Engine
 def draw_img( y, x,curnTurn):
-    posx = x * 40
-    posy = y * 40
+    posx = x * 80
+    posy = y * 80
     if (curnTurn == HUMAN):
         screen.blit(ximg, (posy,posx))
     else:
@@ -403,17 +330,17 @@ def click(x,y):
         x, y = move_history[-1]
 
         del (move_history[-1])
-        board[y][x] = "0"
+        board[y][x] = " "
         x, y = move_history[-1]
 
         del (move_history[-1])
-        board[y][x] = "0"
+        board[y][x] = " "
         return
 
     if not is_in(board, y, x):
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == ' ':
         draw_img(x, y, HUMAN)
         board[y][x] = 'b'
 
@@ -445,22 +372,33 @@ def draw_grid():
         x = 0
         y = 0
         for l in range(10):
-            x += 40
-            y += 40
-            pygame.draw.line(screen, LINE_COLOR, (x, 0), (x, WIDTH), 2)
-            pygame.draw.line(screen, LINE_COLOR, (0, y), (HEIGHT, y), 2)
-def min_value(board,curTurn, depth):
+            x += 80
+            y += 80
+            pygame.draw.line(screen, LINE_COLOR, (x, 0), (x, WIDTH), 6)
+            pygame.draw.line(screen, LINE_COLOR, (0, y), (HEIGHT, y), 6)
+def min_value(board, prevMove,curTurn, depth):
     #     if success
     prevTurn = AI
     curTurn=HUMAN
     winnner = is_win(board)
     print("winner min",winnner)
+    # pprint("winner",self.status)
+    # self.status=self.make_empty_board(10,10)
+    
+    # pprint(self.board)
+    # if (winnner != 'continue'):
+    #     print("winner min 1",winnner)
+    #     if (winnner == AI):
 
-    if (depth >= 3):
-        state=evaluateState(board)
-        print("state",state)
-        return state
-    bestScore = float('inf')
+    #         return prevMove, 100000
+    #     else:
+    #         return  prevMove,0
+    if (depth >= 2):
+        move,score=best_move(board, 'b')
+        print("hello",move,score)
+        return move,  -score
+    maxscorecol = float('inf')
+    bestMove = (-1, -1)
 
     moves = possible_moves(board)
     if is_empty(board):
@@ -469,62 +407,58 @@ def min_value(board,curTurn, depth):
         for move in moves:
             y,x = move
             board[y][x] =curTurn
-            tempScore =  max_value(board,AI,depth+1)
-            if tempScore < bestScore:
-                bestScore = tempScore
-            board[y][x] ='0'
+            mv, scorecol =  max_value(board,move,AI,depth+1)
+            if scorecol < maxscorecol:
+                maxscorecol = scorecol
+                bestMove = move
+            board[y][x] =' '
             
    
     # print("best min",bestMove,bestScore)
-    return bestScore
-def max_value(board,curTurn,depth):
+    return bestMove, maxscorecol
+def max_value(board,prevMove,curTurn,depth):
+    
     prevTurn = HUMAN
 
     winnner = is_win(board)
     print("winner min",winnner)
+    # pprint("winner",self.status)
+    # self.status=self.make_empty_board(10,10)
+    
 
-    if (depth >= 3):
-        state=evaluateState(board)
-        print("state",state)
-        return state
-    bestScore = float('-inf')
+    # if (winnner !='continue'):
+    #     if(winnner==HUMAN):
+    #         print("prev max",prevMove)
+    #         return prevMove,-100000
+    #     else:
+    #         return  prevMove,0
+    if (depth >= 1):
+        move,score=best_move(board, 'w')
+        # print("hello",move,score)
+        print("best move",move,score)
+        return move, score
+    maxscorecol = float('-inf')
+    bestMove = (-1, -1)
 
     moves = possible_moves(board)
-    pprint(moves)
     if is_empty(board):
         bestMove = (int((len(board)) * random.random()), int((len(board[0])) * random.random()))
     else:
         for move in moves:
             y,x = move
             board[y][x] =curTurn
-            tempScore = min_value(board,HUMAN, depth+1)
-            if tempScore > bestScore:
-                bestScore = tempScore
-            board[y][x] ='0'
+            mv,scorecol = min_value(board, move,HUMAN, depth+1)
+            if scorecol > maxscorecol:
+                maxscorecol = scorecol
+                bestMove = move
+            board[y][x] =' '
             
-    return bestScore
+    return bestMove,maxscorecol
 
 
 def minimax(board,prevMove):
-    curTurn=AI
-    winnner = is_win(board)
-    print("winner min",winnner)
-
-    bestScore = float('-inf')
-    bestMove=(-1,-1)
-    moves = possible_moves(board)
-    pprint(moves)
-    if is_empty(board):
-        bestMove = (int((len(board)) * random.random()), int((len(board[0])) * random.random()))
-    else:
-        for move in moves:
-            y,x = move
-            board[y][x] =curTurn
-            tempScore = min_value(board,HUMAN, 2)
-            if tempScore > bestScore:
-                bestScore = tempScore
-                bestMove=move
-            board[y][x] ='0'
+    bestMove,bestScore=max_value(board,prevMove,AI,1)
+    print("minimax",bestMove)
     return bestMove
 
        

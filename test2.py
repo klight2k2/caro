@@ -1,9 +1,25 @@
-import turtle
+
 import random
 import time
+import pygame
+from pprint import pprint
+import math
 
-global move_history
+pygame.init()
+HUMAN = 'b'
+AI = 'w'
+pygame.display.set_caption("Tic Tac Toe")  # the caption\
+WIDTH = 800
+HEIGHT = 800
+ximg = pygame.image.load("images/X.png")
+oimg = pygame.image.load("images/O.png")
+screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen setup
+LINE_COLOR = (228, 231, 236)
+clock = pygame.time.Clock()  # the Clock object for framerate
+BACKGROUND = (254, 254, 254)
 
+move_history = []
+win = False
 
 def make_empty_board(sz):
     board = []
@@ -117,7 +133,7 @@ def score_of_row(board, cordi, dy, dx, cordf, col):
     y, x = cordi
     yf, xf = cordf
     row = row_to_list(board, y, x, dy, dx, yf, xf)
-    print("score", row)
+    # print("score", row)
 
     for start in range(len(row) - 4):
         score = score_of_list(row[start:start + 5], col)
@@ -213,7 +229,6 @@ def stupid_score(board, col, anticol, y, x):
     trả về điểm số tượng trưng lợi thế 
     '''
 
-    global colors
     M = 1000
     res, adv, dis = 0, 0, 0
 
@@ -221,7 +236,7 @@ def stupid_score(board, col, anticol, y, x):
     board[y][x] = col
     # draw_stone(x,y,colors[col])
     sumcol = score_of_col_one(board, col, y, x)
-    print(sumcol)
+    # print(sumcol)
     a = winning_situation(sumcol)
     adv += a * M
     sum_sumcol_values(sumcol)
@@ -291,34 +306,44 @@ def best_move(board, col):
                 if scorecol > maxscorecol:
                     maxscorecol = scorecol
                     movecol = move
-    return movecol
-
+    return movecol,maxscorecol
 
 ##Graphics Engine
-
-def click(x, y):
-    global board, colors, win, move_history
-
-    x, y = getindexposition(x, y)
-
+def draw_img( y, x,curnTurn):
+    posx = x * 80
+    posy = y * 80
+    if (curnTurn == HUMAN):
+        screen.blit(ximg, (posy,posx))
+    else:
+        screen.blit(oimg, ( posy,posx))
+    pygame.display.update()
+def get_position():  # to render the image at the clicked position update value of curTurn as in whose turn it is
+        x,y = pygame.mouse.get_pos()
+        x = math.floor(x / 80)
+        y = math.floor(y / 80)
+        # print(y,x)
+        return (x,y)
+board = make_empty_board(10)
+def click(x,y):
+    global board
     if x == -1 and y == -1 and len(move_history) != 0:
         x, y = move_history[-1]
 
         del (move_history[-1])
-        board[y][x] = ' '
+        board[y][x] = " "
         x, y = move_history[-1]
 
         del (move_history[-1])
-        board[y][x] = ' '
+        board[y][x] = " "
         return
 
     if not is_in(board, y, x):
         return
 
     if board[y][x] == ' ':
-
-        draw_stone(x, y, colors['b'])
+        draw_img(x, y, HUMAN)
         board[y][x] = 'b'
+
 
         move_history.append((x, y))
 
@@ -328,9 +353,12 @@ def click(x, y):
             win = True
             return
 
-        ay, ax = best_move(board, 'w')
-        draw_stone(ax, ay, colors['w'])
+        ay, ax = minimax(board,(y,x))
+        print(ay, ax)
+        draw_img(ax,ay, AI)
         board[ay][ax] = 'w'
+        print("board",board)
+        pprint(board)
 
         move_history.append((ax, ay))
 
@@ -339,88 +367,117 @@ def click(x, y):
             print(game_res)
             win = True
             return
+def draw_grid():
+        screen.fill(BACKGROUND)
+        x = 0
+        y = 0
+        for l in range(10):
+            x += 80
+            y += 80
+            pygame.draw.line(screen, LINE_COLOR, (x, 0), (x, WIDTH), 6)
+            pygame.draw.line(screen, LINE_COLOR, (0, y), (HEIGHT, y), 6)
+def min_value(board, prevMove,curTurn, depth):
+    #     if success
+    prevTurn = AI
+    curTurn=HUMAN
+    winnner = is_win(board)
+    print("winner min",winnner)
+    # pprint("winner",self.status)
+    # self.status=self.make_empty_board(10,10)
+    
+    # pprint(self.board)
+    # if (winnner != 'continue'):
+    #     print("winner min 1",winnner)
+    #     if (winnner == AI):
 
+    #         return prevMove, 100000
+    #     else:
+    #         return  prevMove,0
+    if (depth >= 3):
+        move,score=best_move(board, 'b')
+        print("hello",move,score)
+        return move,  score
+    maxscorecol = float('inf')
+    bestMove = (-1, -1)
 
-def initialize(size):
-    global win, board, screen, colors, move_history
-
-    move_history = []
-    win = False
-    board = make_empty_board(size)
-
-    screen = turtle.Screen()
-    screen.onclick(click)
-    screen.setup(screen.screensize()[1] * 2, screen.screensize()[1] * 2)
-    screen.setworldcoordinates(-1, size, size, -1)
-    screen.bgcolor('orange')
-    screen.tracer(500)
-
-    colors = {'w': turtle.Turtle(), 'b': turtle.Turtle(), 'g': turtle.Turtle()}
-    colors['w'].color('white')
-    colors['b'].color('black')
-
-    for key in colors:
-        colors[key].ht()
-        colors[key].penup()
-        colors[key].speed(0)
-
-    border = turtle.Turtle()
-    border.speed(9)
-    border.penup()
-
-    side = (size - 1) / 2
-
-    i = -1
-    for start in range(size):
-        border.goto(start, side + side * i)
-        border.pendown()
-        i *= -1
-        border.goto(start, side + side * i)
-        border.penup()
-
-    i = 1
-    for start in range(size):
-        border.goto(side + side * i, start)
-        border.pendown()
-        i *= -1
-        border.goto(side + side * i, start)
-        border.penup()
-
-    border.ht()
-
-    screen.listen()
-    screen.mainloop()
-
-
-def getindexposition(x, y):
-    '''
-    lấy index
-    '''
-    intx, inty = int(x), int(y)
-    dx, dy = x - intx, y - inty
-    if dx > 0.5:
-        x = intx + 1
-    elif dx < -0.5:
-        x = intx - 1
+    moves = possible_moves(board)
+    if is_empty(board):
+        bestMove = (int((len(board)) * random.random()), int((len(board[0])) * random.random()))
     else:
-        x = intx
-    if dy > 0.5:
-        y = inty + 1
-    elif dx < -0.5:
-        y = inty - 1
+        for move in moves:
+            y,x = move
+            board[y][x] =curTurn
+            mv, scorecol =  max_value(board,move,AI,depth+1)
+            if scorecol < maxscorecol:
+                maxscorecol = scorecol
+                bestMove = mv
+            board[y][x] =' '
+            
+   
+    # print("best min",bestMove,bestScore)
+    return bestMove, maxscorecol
+def max_value(board,prevMove,curTurn,depth):
+    
+    prevTurn = HUMAN
+
+    winnner = is_win(board)
+    print("winner min",winnner)
+    # pprint("winner",self.status)
+    # self.status=self.make_empty_board(10,10)
+    
+
+    # if (winnner !='continue'):
+    #     if(winnner==HUMAN):
+    #         print("prev max",prevMove)
+    #         return prevMove,-100000
+    #     else:
+    #         return  prevMove,0
+    if (depth >= 3):
+        move,score=best_move(board, 'w')
+        # print("hello",move,score)
+        print("best move",move,score)
+        return move, score
+    maxscorecol = float('-inf')
+    bestMove = (-1, -1)
+
+    moves = possible_moves(board)
+    if is_empty(board):
+        bestMove = (int((len(board)) * random.random()), int((len(board[0])) * random.random()))
     else:
-        y = inty
-    return x, y
+        for move in moves:
+            y,x = move
+            board[y][x] =curTurn
+            move,scorecol = min_value(board, move,HUMAN, depth+1)
+            if scorecol > maxscorecol:
+                maxscorecol = scorecol
+                bestMove = move
+            board[y][x] =' '
+            
+    return bestMove,maxscorecol
 
 
-def draw_stone(x, y, colturtle):
-    colturtle.goto(x, y - 0.3)
-    colturtle.pendown()
-    colturtle.begin_fill()
-    colturtle.circle(0.3)
-    colturtle.end_fill()
-    colturtle.penup()
+def minimax(board,prevMove):
+    bestMove,bestScore=max_value(board,prevMove,AI,1)
+    print("minimax",bestMove)
+    return bestMove
 
+       
+draw_grid()
+run = True
+global playing
+playing = False
+drawGridCkeck = False
+while run:  # the game loop
+    for event in pygame.event.get():
+        if (event.type == pygame.MOUSEBUTTONDOWN):
+           x,y=get_position()
+           click(x,y)
+           print("click",x,y)
 
-if __name__ == '__main__':
-    initialize(10)
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+
+    pygame.display.update()
+    clock.tick(30)  # refresh rate
+

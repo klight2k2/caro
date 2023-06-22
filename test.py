@@ -16,8 +16,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen setup
 LINE_COLOR = (228, 231, 236)
 clock = pygame.time.Clock()  # the Clock object for framerate
 BACKGROUND = (254, 254, 254)
-attackScore = [0, 200, 400,1600, 2000, 12288, 98304]
-defenseScore = [0, 10, 20, 40, 1000, 6561, 59049]
+attackScore = [0,  10,100, 1000,10000, 100000, 98304]
+defenseScore = [0,  10,100, 1000,10000, 100000, 98304]
 
 RULE=5
 class Board:
@@ -39,7 +39,7 @@ class Board:
         # mảng directions lưu hướng đi (8 hướng)
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, -1), (-1, 1), (1, -1)]
         # cord: lưu các vị trí không đi 
-        cord = {}
+        cord = []
 
         for i in range(len(self.board)):
             for j in range(len(self.board)):
@@ -52,10 +52,10 @@ class Board:
             dy, dx = direction
             for coord in taken:
                 y, x = coord
-                for length in [1, 2, 3, 4]:
+                for length in [1, 2]:
                     move = self.march(self.board, y, x, dy, dx, length)
                     if move not in taken and move not in cord:
-                        cord[move] = False
+                        cord.append(move)
         return cord
     def march(self,board, y, x, dy, dx, length):
         '''
@@ -249,7 +249,7 @@ class Board:
             else: break
 
         if (enermyCount == 2): return 0
-        score = attackScore[armyCount] - defenseScore[enermyCount]
+        score = attackScore[armyCount] - defenseScore[enermyCount+1]
         return score
 
     def attack_score_horizontal(self, row, col, curTurn):
@@ -276,7 +276,7 @@ class Board:
             else: break
 
         if (enermyCount == 2): return 0
-        score = attackScore[armyCount] - defenseScore[enermyCount]
+        score = attackScore[armyCount] - defenseScore[enermyCount+1]
         return score
 
     def attack_score_major(self, row, col, curTurn):
@@ -304,7 +304,7 @@ class Board:
             else: break
 
         if (enermyCount == 2): return 0
-        score = attackScore[armyCount] - defenseScore[enermyCount]
+        score = attackScore[armyCount] - defenseScore[enermyCount+1]
         return score
     def attack_score_minor(self, row, col, curTurn):
         
@@ -331,7 +331,7 @@ class Board:
             else: break
 
         if (enermyCount == 2): return 0
-        score=attackScore[armyCount] - defenseScore[enermyCount]
+        score=attackScore[armyCount] - defenseScore[enermyCount+1]
         return score
     def defense_score_vertical(self, row, col, curTurn):
         # Duyet doc 
@@ -455,10 +455,10 @@ class Board:
                 tempScore=scoreAttack
                 # print(i,j,scoreAttack,scoreDefense,self.defense_score_minor(i,j,curTurn))
                 if(tempScore < scoreDefense): tempScore= scoreDefense
-                # self.status[i][j]=tempScore
+                self.status[i][j]=tempScore
                 if(tempScore > scoreMax):
                     scoreMax=tempScore
-                    bestMove=(i,j)
+                    bestMove=move
                     # print("best score",scoreMax,scoreDefense,self.defense_score_minor(i,j,curTurn))
         return bestMove,scoreMax
     def play_chess(self,move,curTurn):
@@ -483,21 +483,24 @@ class Board:
     def min_value(self, prevMove,curTurn, depth):
         #     if success
         prevTurn = AI
-
+        curTurn=HUMAN
         winnner = self.check_win(prevMove, prevTurn, curTurn)
-        print("winner",winnner)
+        print("winner min",winnner)
         # pprint("winner",self.status)
         # self.status=self.make_empty_board(10,10)
         
         # pprint(self.board)
         if (winnner != 'continue'):
+            print("winner min 1",winnner)
             if (winnner == AI):
+
                 return prevMove, 100000
             else:
                 return  prevMove,0
         if (depth >= 2):
             move,score=self.find_move(curTurn)
-            return move, score
+            # print("hello",move,score)
+            return move, -score
         bestScore = float('inf')
         bestMove = (-1, -1)
 
@@ -509,7 +512,7 @@ class Board:
                 move, score = self.max_value((i,j),AI, depth+1)
                 if (score < bestScore):
                     bestScore = score
-                    bestMove = move
+                    bestMove = mv
                 self.board[i][j]=' '
 
         # print("best min",bestMove,bestScore)
@@ -527,36 +530,39 @@ class Board:
 
         if (winnner !='continue'):
             if(winnner==HUMAN):
+                print("prev max",prevMove)
                 return prevMove,-100000
             else:
                 return  prevMove,0
         if(depth >=2):
             move,score=self.find_move(curTurn)
+            # print("move score",move,score)
             return move, score
 
         bestScore=float('-inf')
-        bestMove=(-1,-1)
+        bestMove=()
         moves = self.possible_moves()
+        print("possible moves",moves)
         for mv in moves:
             i,j=mv
             if (self.board[i][j] == ' '):
                 self.board[i][j]=curTurn
-                
+                print("test", bestScore, mv)   
                 move,score= self.min_value( (i,j),HUMAN,depth+1)
-                self.status[i][j]=score
                 if(score>bestScore):
                     bestScore=score
-                    bestMove=move   
+                    bestMove=mv
                 self.board[i][j]=' '
         # print("best max",bestMove,bestScore)
         return bestMove,bestScore
 
 
     def minimax(self):
-        # print("history move",self.historyMove)
         bestMove,bestScore=self.max_value(self.historyMove,AI,1)
         print("minimax",bestMove)
+        i,j=bestMove
         print("best score",bestScore)
+        print("best score",self.status[i][j])
         pprint(self.status)
         return bestMove
 

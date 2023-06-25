@@ -1,6 +1,7 @@
 import pygame
 from pprint import pprint
 import math
+import time
 
 pygame.init()
 pygame.display.set_caption("Tic Tac Toe") 
@@ -9,17 +10,25 @@ pygame.display.set_caption("Tic Tac Toe")
 HUMAN = 'b'
 AI = 'w'
 DRAW='draw'
+
+# config ban co cho  danh 5
 WIDTH = 480
 HEIGHT = 480
 CEIL=48
 SIZE=10
 RULE=5
+COUNTNODE=0
 
-# WIDTH = 240
-# HEIGHT = 240
-# CEIL=80
+# config ban co cho danh 3
+# COUNTNODE=0
+# WIDTH = 480
+# HEIGHT = 480
+# CEIL=160
 # SIZE=3
 # RULE=3
+# COUNTNODE=0
+
+
 win=False
 move_history=[]
 # Các đường chiến lược để thắng ván cờ
@@ -432,31 +441,30 @@ def winning_situation(road_of_player):
     return 0
 
 
-def best_move(board, col):
+def best_move(board, player):
     '''
     trả lại điểm số của mảng trong lợi thế của từng màu
     '''
-    if col == 'w':
-        anticol = 'b'
+    if player == 'w':
+        rival = 'b'
     else:
-        anticol = 'w'
+        rival = 'w'
 
-    movecol = (0, 0)
-    curScore=0
-    maxscorecol = float('-inf')
+    movePlayer = (0, 0)
+    # curScore=float('-inf')
+    maxscore = float('-inf')
     # kiểm tra nếu bàn cờ rỗng thì cho vị trí random nếu không thì đưa ra giá trị trên bàn cờ nên đi 
     if is_empty(board):
-        movecol = (SIZE/2,SIZE/2)
+        movePlayer = (SIZE/2,SIZE/2)
     else:
         moves = possible_moves(board)
 
         for move in moves:
             y, x = move
-            scorecol = calc_score(board, col, anticol, y, x)
-            curScore+=scorecol
-            if scorecol > maxscorecol:
-                maxscorecol = scorecol
-                movecol = move
+            curScore = calc_score(board, player, rival, y, x)
+            if curScore > maxscore:
+                maxscore = curScore
+                movePlayer = move
     return movecol
 
 def draw_img( y, x,curnTurn):
@@ -559,6 +567,7 @@ def is_win(board):
 # ----------------------------------------------------------------
 # hàm minimax kết hợp tri thức bổ sung
 def min_value(board, depth):
+    global COUNTNODE
     winner = is_win(board)
     # print("winner min",winner)
     if(winner==AI):
@@ -578,6 +587,7 @@ def min_value(board, depth):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =HUMAN
             tempScore =  max_value(board,depth+1)
@@ -586,6 +596,7 @@ def min_value(board, depth):
             board[y][x] ='0'
     return bestScore
 def max_value(board,depth):
+    global COUNTNODE
     winner = is_win(board)
     if(winner==AI):
         return 100000
@@ -606,6 +617,7 @@ def max_value(board,depth):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =AI
             tempScore = min_value(board, depth+1)
@@ -616,6 +628,8 @@ def max_value(board,depth):
     return bestScore
 
 def minimax(board):
+    global COUNTNODE
+    COUNTNODE=0
     curTurn=AI
     winner = is_win(board)
     # print("winner min",winner)
@@ -628,6 +642,7 @@ def minimax(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =curTurn
             tempScore = min_value(board, 2)
@@ -658,7 +673,7 @@ def find_minimax(x,y):
         print(ay, ax)
         draw_img(ax,ay, AI)
         board[ay][ax] = AI
-        print("board",board)
+        # print("board",board)
         pprint(board)
 
         move_history.append((ax, ay))
@@ -670,6 +685,7 @@ def find_minimax(x,y):
 # ----------------------------------------------------------------
 # hàm minimax kết hợp alpha beta và tri thức bổ sung
 def min_value_ab(board, depth,alpha,beta):
+    global COUNTNODE
     winner = is_win(board)
     # print("winner min",winner)
     if(winner==AI):
@@ -689,6 +705,7 @@ def min_value_ab(board, depth,alpha,beta):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =HUMAN
             tempScore =  max_value_ab(board,depth+1,alpha,beta)
@@ -699,6 +716,7 @@ def min_value_ab(board, depth,alpha,beta):
             if(beta<=alpha): break
     return bestScore
 def max_value_ab(board,depth,alpha,beta):
+    global COUNTNODE
     winner = is_win(board)
     if(winner==AI):
         return 100000
@@ -719,6 +737,7 @@ def max_value_ab(board,depth,alpha,beta):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =AI
             tempScore = min_value_ab(board, depth+1,alpha,beta)
@@ -732,6 +751,8 @@ def max_value_ab(board,depth,alpha,beta):
 
 
 def minimax_ab(board):
+    global COUNTNODE
+    COUNTNODE=0
     alpha=float('-inf')
     beta=float('inf')
     curTurn=AI
@@ -746,6 +767,7 @@ def minimax_ab(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =curTurn
             tempScore = min_value_ab(board, 2,alpha,beta)
@@ -779,7 +801,7 @@ def find_minimax_ab(x,y):
         print(ay, ax)
         draw_img(ax,ay, AI)
         board[ay][ax] = AI
-        print("board",board)
+        # print("board",board)
         pprint(board)
 
         move_history.append((ax, ay))
@@ -810,7 +832,7 @@ def heuristic(x,y):
         print(ay, ax)
         draw_img(ax,ay, AI)
         board[ay][ax] = 'w'
-        print("board",board)
+        # print("board",board)
         pprint(board)
 
         move_history.append((ax, ay))
@@ -821,8 +843,9 @@ def heuristic(x,y):
             return
 # def minimax_not_heuristic():
 def min_value_not_heuristic(board,move, depth):
+    global COUNTNODE
     winner = CheckState(board).check_win(move,AI,HUMAN)
-    print("winner min",winner)
+    # print("winner min",winner)
     if(winner==AI):
         return 100000
     elif(winner==HUMAN):
@@ -840,6 +863,7 @@ def min_value_not_heuristic(board,move, depth):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =HUMAN
             tempScore =  max_value_not_heuristic(board,move,depth+1)
@@ -848,6 +872,7 @@ def min_value_not_heuristic(board,move, depth):
             board[y][x] ='0'
     return bestScore
 def max_value_not_heuristic(board,move,depth):
+    global COUNTNODE
     winner = CheckState(board).check_win(move,HUMAN,AI)
     if(winner==AI):
         return 100000
@@ -868,6 +893,7 @@ def max_value_not_heuristic(board,move,depth):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =AI
             tempScore = min_value_not_heuristic(board,move, depth+1)
@@ -878,6 +904,8 @@ def max_value_not_heuristic(board,move,depth):
     return bestScore
 
 def minimax_not_heuristic(board):
+    global COUNTNODE
+    COUNTNODE = 0
     bestScore = float('-inf')
     bestMove=(-1,-1)
     moves = all_moves(board)
@@ -887,6 +915,7 @@ def minimax_not_heuristic(board):
     else:
         for move in moves:
             y,x = move
+            COUNTNODE+=1
             board[y][x] =AI
             tempScore = min_value_not_heuristic(board,move, 2)
             if tempScore > bestScore:
@@ -916,14 +945,14 @@ def not_heuristic(x,y):
         print(ay, ax)
         draw_img(ax,ay, AI)
         board[ay][ax] = 'w'
-        print("board",board)
+        # print("board",board)
 
         pprint(board)
 
         move_history.append((ax, ay))
         game_res = CheckState(board).check_win((ay,ax),AI,HUMAN)
         print("game_res",game_res)
-        pprint(board)
+        # pprint(board)
         if game_res in [ HUMAN,AI,DRAW]:
             print_game(game_res)
             return
@@ -932,6 +961,7 @@ def not_heuristic(x,y):
 
 # def minimax_not_heuristic():
 def min_value_ab_not_heuristic(board,move, depth,alpha,beta):
+    global COUNTNODE
     winner = CheckState(board).check_win(move,AI,HUMAN)
     # print("winner min",winner)
     if(winner==AI):
@@ -951,6 +981,7 @@ def min_value_ab_not_heuristic(board,move, depth,alpha,beta):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =HUMAN
             tempScore =  max_value_ab_not_heuristic(board,move,depth+1,alpha,beta)
@@ -961,6 +992,7 @@ def min_value_ab_not_heuristic(board,move, depth,alpha,beta):
             if(beta<=alpha): break
     return bestScore
 def max_value_ab_not_heuristic(board,move,depth,alpha,beta):
+    global COUNTNODE
     winner = CheckState(board).check_win(move,HUMAN,AI)
     if(winner==AI):
         return 100000
@@ -981,6 +1013,7 @@ def max_value_ab_not_heuristic(board,move,depth,alpha,beta):
         bestMove = (SIZE/2,SIZE/2)
     else:
         for move in moves:
+            COUNTNODE+=1
             y,x = move
             board[y][x] =AI
             tempScore = min_value_ab_not_heuristic(board,move, depth+1,alpha,beta)
@@ -993,6 +1026,8 @@ def max_value_ab_not_heuristic(board,move,depth,alpha,beta):
     return bestScore
 
 def minimax_ab_not_heuristic(board):
+    global COUNTNODE
+    COUNTNODE=0
     alpha=float('-inf')
     beta=float('inf')
     bestScore = float('-inf')
@@ -1004,6 +1039,7 @@ def minimax_ab_not_heuristic(board):
     else:
         for move in moves:
             y,x = move
+            COUNTNODE+=1
             board[y][x] =AI
             tempScore = min_value_ab_not_heuristic(board,move, 2,alpha,beta)
             if tempScore > bestScore:
@@ -1035,14 +1071,14 @@ def ab_not_heuristic(x,y):
         print(ay, ax)
         draw_img(ax,ay, AI)
         board[ay][ax] = 'w'
-        print("board",board)
+        # print("board",board)
 
         pprint(board)
 
         move_history.append((ax, ay))
         game_res = CheckState(board).check_win((ay,ax),AI,HUMAN)
         print("game_res",game_res)
-        pprint(board)
+        # pprint(board)
         if game_res in [ HUMAN,AI,DRAW]:
             print_game(game_res)
             return
@@ -1081,15 +1117,36 @@ def initialize():
                     x,y=get_position()
                     if(win): break
                     if(mode==1) :
+                        startTime = time.time()
                         not_heuristic(x,y)
+                        endTime = time.time()
+                        print("Thinking time ", endTime - startTime)
+                        print("COUNT node",COUNTNODE)
+
                     elif(mode==2) :
+                        startTime=time.time()
                         ab_not_heuristic(x,y)
+                        endTime=time.time()
+                        print("Thinking time",endTime-startTime)
+                        print("COUNT node",COUNTNODE)
                     elif(mode==3) :
+                        startTime=time.time()
                         find_minimax(x,y)
+                        endTime=time.time()
+                        print("Thinking time",endTime-startTime)
+                        print("COUNT node",COUNTNODE)
                     elif(mode==4) :
+                        startTime=time.time()
                         find_minimax_ab(x,y)
+                        endTime=time.time()
+                        print("Thinking time",endTime-startTime)
+                        print("COUNT node",COUNTNODE)
                     elif(mode==5) :
+                        startTime=time.time()
                         heuristic(x,y)
+                        endTime=time.time()
+                        print("Thinking time",endTime-startTime)
+                        print("COUNT node",COUNTNODE)
                     print("click",x,y)
             else:
                 

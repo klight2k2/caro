@@ -442,6 +442,8 @@ def winning_situation(road_of_player):
 
 
 def best_move(board, player):
+    global COUNTNODE
+    COUNTNODE=0
     '''
     trả lại điểm số của mảng trong lợi thế của từng màu
     '''
@@ -458,6 +460,7 @@ def best_move(board, player):
         movePlayer = (SIZE/2,SIZE/2)
     else:
         moves = possible_moves(board)
+        COUNTNODE=len(moves)
 
         for move in moves:
             y, x = move

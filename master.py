@@ -9,9 +9,9 @@ pygame.display.set_caption("Tic Tac Toe")
 HUMAN = 'b'
 AI = 'w'
 DRAW='draw'
-WIDTH = 400
-HEIGHT = 400
-CEIL=40
+WIDTH = 480
+HEIGHT = 480
+CEIL=48
 SIZE=10
 RULE=5
 
@@ -44,9 +44,9 @@ point = [
     	100000];
 # import image 
 ximg = pygame.image.load("images/X.png")
-ximg=pygame.transform.scale(ximg,(40,40))
+ximg=pygame.transform.scale(ximg,(CEIL,CEIL))
 oimg = pygame.image.load("images/O.png")
-oimg=pygame.transform.scale(oimg,(40,40))
+oimg=pygame.transform.scale(oimg,(CEIL,CEIL))
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen setup
 LINE_COLOR = (228, 231, 236)
@@ -218,7 +218,12 @@ def march(board, y, x, dy, dx, length):
 
     return yf, xf
 
-
+def all_moves(board):
+    taken=[]
+    for i in range(len(board)):
+        for j in range(len(board)):
+            if(board[i][j]=="0"): taken.append((i,j))
+    return taken
 def possible_moves(board):
     '''
     Tìm kiếm các nước đi có thể đi( các nước cách những nước đã đánh trong phạm vi nhất định)
@@ -555,7 +560,7 @@ def is_win(board):
 # hàm minimax kết hợp tri thức bổ sung
 def min_value(board, depth):
     winner = is_win(board)
-    print("winner min",winner)
+    # print("winner min",winner)
     if(winner==AI):
         return 100000
     elif(winner==HUMAN):
@@ -564,7 +569,7 @@ def min_value(board, depth):
         return 0
     if (depth >= 3):
         state=evaluateState(board)
-        print("state",state)
+        # print("state",state)
         return state
     bestScore = float('inf')
 
@@ -591,12 +596,12 @@ def max_value(board,depth):
 
     if (depth >= 3):
         state=evaluateState(board)
-        print("state",state)
+        # print("state",state)
         return state
     bestScore = float('-inf')
 
     moves = possible_moves(board)
-    pprint(moves)
+    # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -613,12 +618,12 @@ def max_value(board,depth):
 def minimax(board):
     curTurn=AI
     winner = is_win(board)
-    print("winner min",winner)
+    # print("winner min",winner)
 
     bestScore = float('-inf')
     bestMove=(-1,-1)
     moves = possible_moves(board)
-    pprint(moves)
+    # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -666,7 +671,7 @@ def find_minimax(x,y):
 # hàm minimax kết hợp alpha beta và tri thức bổ sung
 def min_value_ab(board, depth,alpha,beta):
     winner = is_win(board)
-    print("winner min",winner)
+    # print("winner min",winner)
     if(winner==AI):
         return 100000
     elif(winner==HUMAN):
@@ -675,7 +680,7 @@ def min_value_ab(board, depth,alpha,beta):
         return 0
     if (depth >= 3):
         state=evaluateState(board)
-        print("state",state)
+        # print("state",state)
         return state
     bestScore = float('inf')
 
@@ -704,12 +709,12 @@ def max_value_ab(board,depth,alpha,beta):
 
     if (depth >= 3):
         state=evaluateState(board)
-        print("state",state)
+        # print("state",state)
         return state
     bestScore = float('-inf')
 
     moves = possible_moves(board)
-    pprint(moves)
+    # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -731,12 +736,12 @@ def minimax_ab(board):
     beta=float('inf')
     curTurn=AI
     winner = is_win(board)
-    print("winner min",winner)
+    # print("winner min",winner)
 
     bestScore = float('-inf')
     bestMove=(-1,-1)
     moves = possible_moves(board)
-    pprint(moves)
+    # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -830,7 +835,7 @@ def min_value_not_heuristic(board,move, depth):
     #     return state
     bestScore = float('inf')
 
-    moves = possible_moves(board)
+    moves = all_moves(board)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -857,8 +862,8 @@ def max_value_not_heuristic(board,move,depth):
     #     return state
     bestScore = float('-inf')
 
-    moves = possible_moves(board)
-    pprint(moves)
+    moves = all_moves(board)
+    # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
     else:
@@ -875,7 +880,7 @@ def max_value_not_heuristic(board,move,depth):
 def minimax_not_heuristic(board):
     bestScore = float('-inf')
     bestMove=(-1,-1)
-    moves = possible_moves(board)
+    moves = all_moves(board)
     # pprint(moves)
     if is_empty(board):
         bestMove = (SIZE/2,SIZE/2)
@@ -922,8 +927,134 @@ def not_heuristic(x,y):
         if game_res in [ HUMAN,AI,DRAW]:
             print_game(game_res)
             return
+
+
+
+# def minimax_not_heuristic():
+def min_value_ab_not_heuristic(board,move, depth,alpha,beta):
+    winner = CheckState(board).check_win(move,AI,HUMAN)
+    # print("winner min",winner)
+    if(winner==AI):
+        return 100000
+    elif(winner==HUMAN):
+        return -100000
+    elif(winner==DRAW):
+        return 0
+    # if (depth >= 3):
+    #     state=evaluateState(board)
+    #     print("state",state)
+    #     return state
+    bestScore = float('inf')
+
+    moves = all_moves(board)
+    if is_empty(board):
+        bestMove = (SIZE/2,SIZE/2)
+    else:
+        for move in moves:
+            y,x = move
+            board[y][x] =HUMAN
+            tempScore =  max_value_ab_not_heuristic(board,move,depth+1,alpha,beta)
+            if tempScore < bestScore:
+                bestScore = tempScore
+            board[y][x] ='0'
+            beta=min(beta,bestScore)
+            if(beta<=alpha): break
+    return bestScore
+def max_value_ab_not_heuristic(board,move,depth,alpha,beta):
+    winner = CheckState(board).check_win(move,HUMAN,AI)
+    if(winner==AI):
+        return 100000
+    elif(winner==HUMAN):
+        return -100000
+    elif(winner==DRAW):
+        return 0
+
+    # if (depth >= 3):
+    #     state=evaluateState(board)
+    #     print("state",state)
+    #     return state
+    bestScore = float('-inf')
+
+    moves = all_moves(board)
+    # pprint(moves)
+    if is_empty(board):
+        bestMove = (SIZE/2,SIZE/2)
+    else:
+        for move in moves:
+            y,x = move
+            board[y][x] =AI
+            tempScore = min_value_ab_not_heuristic(board,move, depth+1,alpha,beta)
+            if tempScore > bestScore:
+                bestScore = tempScore
+            board[y][x] ='0'
+            alpha=max(alpha,bestScore)
+            if(beta<=alpha): break
+            
+    return bestScore
+
+def minimax_ab_not_heuristic(board):
+    alpha=float('-inf')
+    beta=float('inf')
+    bestScore = float('-inf')
+    bestMove=(-1,-1)
+    moves = all_moves(board)
+    # pprint(moves)
+    if is_empty(board):
+        bestMove = (SIZE/2,SIZE/2)
+    else:
+        for move in moves:
+            y,x = move
+            board[y][x] =AI
+            tempScore = min_value_ab_not_heuristic(board,move, 2,alpha,beta)
+            if tempScore > bestScore:
+                bestScore = tempScore
+                bestMove=move
+            board[y][x] ='0'
+            alpha=max(alpha,bestScore)
+            if(beta<=alpha): break
+    return bestMove
+def ab_not_heuristic(x,y):
+    global board
+   
+    if not is_in(board, y, x) or board[y][x] != '0':
+        return
+
+    if board[y][x] == '0':
+        draw_img(x, y, HUMAN)
+        board[y][x] = 'b'
+
+
+        move_history.append((x, y))
+
+        game_res = CheckState(board).check_win((y,x),HUMAN,AI)
+        if game_res in [ HUMAN,AI,DRAW]:
+            print_game(game_res) 
+            return
+
+        ay, ax = minimax_ab_not_heuristic(board)
+        print(ay, ax)
+        draw_img(ax,ay, AI)
+        board[ay][ax] = 'w'
+        print("board",board)
+
+        pprint(board)
+
+        move_history.append((ax, ay))
+        game_res = CheckState(board).check_win((ay,ax),AI,HUMAN)
+        print("game_res",game_res)
+        pprint(board)
+        if game_res in [ HUMAN,AI,DRAW]:
+            print_game(game_res)
+            return
+
 import button
 font = pygame.font.SysFont('Georgia', 15)
+minimax_heuristic = button.button(WIDTH /2, HEIGHT /2 - 50, font, 'Minimax+ heuristic')
+minimax_alpha_beta_heuristic= button.button(WIDTH /2, HEIGHT /2 , font, 'Minimax +alpha beta heuristic')
+heuristic_button = button.button(WIDTH /2, HEIGHT /2 +50 , font, 'heuristic')
+minimax_button = button.button(WIDTH /2, HEIGHT /2 -150 , font, 'minimax')
+minimax_alpha_beta_button = button.button(WIDTH /2, HEIGHT /2 -100 , font, 'minimax alpha beta')
+bg = pygame.image.load("images/bg.jpg")
 def print_game(winner):
     global win
     if winner==HUMAN: winner='human '
@@ -931,25 +1062,64 @@ def print_game(winner):
     congra = button.button(HEIGHT /2, WIDTH /2, font, winner+"won")    
     congra.draw_button(screen)
     win=True
-    
 def initialize():
+    mode=1    
     global board,win
     board=make_empty_board(SIZE)
     draw_grid()
     run = True
-    global playing
+    # global playing
     playing = False
     drawGridCkeck = False
     while run:  
         for event in pygame.event.get():
-            if (event.type == pygame.MOUSEBUTTONDOWN):
-                x,y=get_position()
-                if(win): break
-                # heuristic(x,y)
-                # find_minimax(x,y)
-                # find_minimax_ab(x,y)
-                # not_heuristic(x,y)
-                print("click",x,y)
+            if drawGridCkeck:
+                drawGridCkeck=False
+                draw_grid()
+            if(playing):
+                if (event.type == pygame.MOUSEBUTTONDOWN):
+                    x,y=get_position()
+                    if(win): break
+                    if(mode==1) :
+                        not_heuristic(x,y)
+                    elif(mode==2) :
+                        ab_not_heuristic(x,y)
+                    elif(mode==3) :
+                        find_minimax(x,y)
+                    elif(mode==4) :
+                        find_minimax_ab(x,y)
+                    elif(mode==5) :
+                        heuristic(x,y)
+                    print("click",x,y)
+            else:
+                
+                screen.blit(bg, (0, 0))
+                if minimax_button.draw_button(screen):
+                    playing = True
+                    mode=1
+                    drawGridCkeck=True
+                    print('minimax')
+                if minimax_alpha_beta_button.draw_button(screen):
+                    print('minimax alpha beta')
+                    playing = True
+                    mode=2
+                    drawGridCkeck=True
+                if minimax_heuristic.draw_button(screen):
+                    playing = True
+                    mode=3
+                    drawGridCkeck=True
+                    print('heuristic + minimax')
+                    drawGridCkeck=True
+                if minimax_alpha_beta_heuristic.draw_button(screen):
+                    playing = True
+                    mode=4
+                    drawGridCkeck=True
+                    print('minimax alpha beta heuristic')
+                if heuristic_button.draw_button(screen):
+                    playing = True
+                    mode=5
+                    drawGridCkeck=True
+                    print('heuristic')
 
             if event.type == pygame.QUIT:
                 pygame.quit()

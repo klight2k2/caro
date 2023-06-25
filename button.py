@@ -18,7 +18,7 @@ class button():
     hover_col = '#F082AC'
     click_col = (50, 150, 255)
     text_col = white
-    width = 150
+    width = 240
     height = 40
 
     def __init__(self, x, y,font, text):

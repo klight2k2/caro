@@ -465,7 +465,7 @@ def best_move(board, player):
             if curScore > maxscore:
                 maxscore = curScore
                 movePlayer = move
-    return movecol
+    return movePlayer
 
 def draw_img( y, x,curnTurn):
     posx = x * CEIL

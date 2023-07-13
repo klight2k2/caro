@@ -1,197 +1,391 @@
+import button
 import pygame
 from pprint import pprint
 import math
 import time
 
+import openpyxl
+
+
+def output_Excel(input_detail, output_excel_path):
+    # Xác định số hàng và cột lớn nhất trong file excel cần tạo
+    row = len(input_detail)
+    column = len(input_detail[0])
+
+    # Tạo một workbook mới và active nó
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    # Dùng vòng lặp for để ghi nội dung từ input_detail vào file Excel
+    for i in range(0, row):
+        for j in range(0, column):
+            v = input_detail[i][j]
+            ws.cell(column=j + 1, row=i + 1, value=v)
+
+    # Lưu lại file Excel
+    wb.save(output_excel_path)
+
+
+input_detail = [["Số Node", "Thời gian"]]
+output_excel_path = ""
+
+
 pygame.init()
-pygame.display.set_caption("Tic Tac Toe") 
+pygame.display.set_caption("Tic Tac Toe")
 
 # init constants
-HUMAN = 'b'
-AI = 'w'
-DRAW='draw'
+HUMAN = "b"
+AI = "w"
+DRAW = "draw"
 
 # config ban co cho  danh 5
-WIDTH = 480
-HEIGHT = 480
-CEIL=48
-SIZE=10
-RULE=5
-COUNTNODE=0
-
-# config ban co cho danh 3
-# COUNTNODE=0
 # WIDTH = 480
 # HEIGHT = 480
-# CEIL=160
-# SIZE=3
-# RULE=3
+# CEIL = 48
+# SIZE = 10
+# RULE = 5
+# COUNTNODE = 0
+
+# config ban co cho danh 3
+COUNTNODE=0
+WIDTH = 480
+HEIGHT = 480
+CEIL=160
+SIZE=3
+RULE=3
 # COUNTNODE=0
 
 
-win=False
-move_history=[]
+win = False
+move_history = []
 # Các đường chiến lược để thắng ván cờ
-caseAI = ['ww00w0', '0ww00w', 'w0w0w0', '0w00ww', '0w0w0w', 'w00ww0', 
-          '000ww0', '00w0w0', '00ww00', 
-          '000ww00', '00w0w00', '0ww000', '0www00', '0ww0w0', '0w0ww0', '00ww0w', '00w0ww', '000www', 'www000', 'ww0w00', 'w0ww00', '0ww0w0', '0w0ww0', '00www0', '00www0', '0www00', '00www00', '00ww0w0', '00w0ww0', '000www0', '0w0w0w0w', '0w0ww00w', '0w00ww0w', '0www000', '0ww0w00', '0w0ww00', '00www00', 'w0w0w0w0', 'w0ww00w0', 'w00ww0w0', '00wwww', '0w0www', '0ww0ww', '0www0w', '0www0w', '0wwww0', '0wwww0', 'w0www0', 'ww0ww0', 'www0w0', 'www0w0', 'wwww00', '0wwwww', 'wwwww0']
-caseHuman =['bb00b0', '0bb00b', 'b0b0b0', '0b00bb', '0b0b0b', 'b00bb0', '000bb0', '00b0b0', '00bb00', '000bb00', '00b0b00', '0bb000', '0bbb00', '0bb0b0', '0b0bb0', '00bb0b', '00b0bb', '000bbb', 'bbb000', 'bb0b00', 'b0bb00', '0bb0b0', '0b0bb0', '00bbb0', '00bbb0', '0bbb00', '00bbb00', '00bb0b0', '00b0bb0', '000bbb0', '0b0b0b0b', '0b0bb00b', '0b00bb0b', '0bbb000', '0bb0b00', '0b0bb00', '00bbb00', 'b0b0b0b0', 'b0bb00b0', 'b00bb0b0', '00bbbb', '0b0bbb', '0bb0bb', '0bbb0b', '0bbb0b', '0bbbb0', '0bbbb0', 'b0bbb0', 'bb0bb0', 'bbb0b0', 'bbb0b0', 'bbbb00', '0bbbbb', 'bbbbb0']
+caseAI = [
+    "ww00w0",
+    "0ww00w",
+    "w0w0w0",
+    "0w00ww",
+    "0w0w0w",
+    "w00ww0",
+    "000ww0",
+    "00w0w0",
+    "00ww00",
+    "000ww00",
+    "00w0w00",
+    "0ww000",
+    "0www00",
+    "0ww0w0",
+    "0w0ww0",
+    "00ww0w",
+    "00w0ww",
+    "000www",
+    "www000",
+    "ww0w00",
+    "w0ww00",
+    "0ww0w0",
+    "0w0ww0",
+    "00www0",
+    "00www0",
+    "0www00",
+    "00www00",
+    "00ww0w0",
+    "00w0ww0",
+    "000www0",
+    "0w0w0w0w",
+    "0w0ww00w",
+    "0w00ww0w",
+    "0www000",
+    "0ww0w00",
+    "0w0ww00",
+    "00www00",
+    "w0w0w0w0",
+    "w0ww00w0",
+    "w00ww0w0",
+    "00wwww",
+    "0w0www",
+    "0ww0ww",
+    "0www0w",
+    "0www0w",
+    "0wwww0",
+    "0wwww0",
+    "w0www0",
+    "ww0ww0",
+    "www0w0",
+    "www0w0",
+    "wwww00",
+    "0wwwww",
+    "wwwww0",
+]
+caseHuman = [
+    "bb00b0",
+    "0bb00b",
+    "b0b0b0",
+    "0b00bb",
+    "0b0b0b",
+    "b00bb0",
+    "000bb0",
+    "00b0b0",
+    "00bb00",
+    "000bb00",
+    "00b0b00",
+    "0bb000",
+    "0bbb00",
+    "0bb0b0",
+    "0b0bb0",
+    "00bb0b",
+    "00b0bb",
+    "000bbb",
+    "bbb000",
+    "bb0b00",
+    "b0bb00",
+    "0bb0b0",
+    "0b0bb0",
+    "00bbb0",
+    "00bbb0",
+    "0bbb00",
+    "00bbb00",
+    "00bb0b0",
+    "00b0bb0",
+    "000bbb0",
+    "0b0b0b0b",
+    "0b0bb00b",
+    "0b00bb0b",
+    "0bbb000",
+    "0bb0b00",
+    "0b0bb00",
+    "00bbb00",
+    "b0b0b0b0",
+    "b0bb00b0",
+    "b00bb0b0",
+    "00bbbb",
+    "0b0bbb",
+    "0bb0bb",
+    "0bbb0b",
+    "0bbb0b",
+    "0bbbb0",
+    "0bbbb0",
+    "b0bbb0",
+    "bb0bb0",
+    "bbb0b0",
+    "bbb0b0",
+    "bbbb00",
+    "0bbbbb",
+    "bbbbb0",
+]
 # Điểm đánh giá của các đường chiến lược
 point = [
-    	4, 4, 4,4, 4, 4,
-    	8, 8, 8,
-    	8, 8, 8, 8, 8, 8, 
-    	8,
-    	8, 8, 8,
-    	8, 8, 8, 8, 8, 8, 
-    	8,
-    	500, 500, 500, 500, 500, 500, 500,
-    	500, 500, 500, 500, 500, 500, 500,
-    	1000, 1000, 1000, 1000, 1000, 1000,
-    	1000, 1000, 1000, 1000, 1000, 1000,
-    	100000,
-    	100000];
-# import image 
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    500,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    100000,
+    100000,
+]
+# import image
 ximg = pygame.image.load("images/X.png")
-ximg=pygame.transform.scale(ximg,(CEIL,CEIL))
+ximg = pygame.transform.scale(ximg, (CEIL, CEIL))
 oimg = pygame.image.load("images/O.png")
-oimg=pygame.transform.scale(oimg,(CEIL,CEIL))
+oimg = pygame.transform.scale(oimg, (CEIL, CEIL))
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen setup
 LINE_COLOR = (228, 231, 236)
 clock = pygame.time.Clock()  # the Clock object for framerate
 BACKGROUND = (254, 254, 254)
 
-class CheckState():
-    def __init__(self,board):
-        self.board=board
-    def checkVertical(self,row, col,prevTurn,curTurn):
+
+class CheckState:
+    def __init__(self, board):
+        self.board = board
+
+    def checkVertical(self, row, col, prevTurn, curTurn):
         head = False
         tail = False
         cnt = 1
         # print('turn ', curTurn, prevTurn)
         for k in range(1, RULE + 1):
-            if (row - k < 0): break
-            if (self.board[row - k][col] == prevTurn):
+            if row - k < 0:
+                break
+            if self.board[row - k][col] == prevTurn:
                 cnt += 1
-            elif (self.board[row - k][col] == curTurn):
+            elif self.board[row - k][col] == curTurn:
                 head = True
                 break
             else:
                 break
         for k in range(1, RULE + 1):
-            if (row + k >= SIZE): break
-            if (self.board[row + k][col] == prevTurn):
+            if row + k >= SIZE:
+                break
+            if self.board[row + k][col] == prevTurn:
                 cnt += 1
-            elif (self.board[row + k][col] == curTurn):
+            elif self.board[row + k][col] == curTurn:
                 tail = True
                 break
             else:
                 break
 
-        if (head and tail):
+        if head and tail:
             return False
-        elif (cnt == RULE):
+        elif cnt == RULE:
             return True
         else:
             return False
 
-    def checkHorizontal(self,row, col,prevTurn,curTurn):
+    def checkHorizontal(self, row, col, prevTurn, curTurn):
         head = False
         tail = False
         cnt = 1
         for k in range(1, RULE + 1):
-            if (col - k < 0): break
-            if (self.board[row][col - k] == prevTurn):
+            if col - k < 0:
+                break
+            if self.board[row][col - k] == prevTurn:
                 cnt += 1
-            elif (self.board[row][col - k] == curTurn):
+            elif self.board[row][col - k] == curTurn:
                 head = True
                 break
             else:
                 break
         for k in range(1, RULE + 1):
-            if (col + k >= SIZE): break
-            if (self.board[row][col + k] == prevTurn):
+            if col + k >= SIZE:
+                break
+            if self.board[row][col + k] == prevTurn:
                 cnt += 1
-            elif (self.board[row][col + k] == curTurn):
+            elif self.board[row][col + k] == curTurn:
                 tail = True
                 break
             else:
                 break
 
-        if (head and tail):
+        if head and tail:
             return False
-        elif (cnt == RULE):
+        elif cnt == RULE:
             return True
         else:
             return False
 
-    def checkMajorDiagonal(self,row, col,prevTurn,curTurn):
+    def checkMajorDiagonal(self, row, col, prevTurn, curTurn):
         head = False
         tail = False
         cnt = 1
         for k in range(1, RULE + 1):
-            if (row - k < 0 or col - k < 0): break
-            if (self.board[row - k][col - k] == prevTurn):
+            if row - k < 0 or col - k < 0:
+                break
+            if self.board[row - k][col - k] == prevTurn:
                 cnt += 1
-            elif (self.board[row - k][col - k] == curTurn):
+            elif self.board[row - k][col - k] == curTurn:
                 head = True
                 break
             else:
                 break
         for k in range(1, RULE + 1):
-            if (row + k >= SIZE or col + k >= SIZE): break
-            if (self.board[row + k][col + k] == prevTurn):
+            if row + k >= SIZE or col + k >= SIZE:
+                break
+            if self.board[row + k][col + k] == prevTurn:
                 cnt += 1
-            elif (self.board[row + k][col + k] == curTurn):
+            elif self.board[row + k][col + k] == curTurn:
                 tail = True
                 break
             else:
                 break
-        if (tail and head):
+        if tail and head:
             return False
-        elif (cnt == RULE):
+        elif cnt == RULE:
             return True
         else:
             return False
 
-    def checkMinorDiagonal(self,row, col,prevTurn,curTurn):
+    def checkMinorDiagonal(self, row, col, prevTurn, curTurn):
         head = False
         tail = False
         cnt = 1
         for k in range(1, RULE + 1):
-            if (row - k < 0 or col + k >= SIZE): break
-            if (self.board[row - k][col + k] == prevTurn):
+            if row - k < 0 or col + k >= SIZE:
+                break
+            if self.board[row - k][col + k] == prevTurn:
                 cnt += 1
-            elif (self.board[row - k][col + k] == curTurn):
+            elif self.board[row - k][col + k] == curTurn:
                 head = True
                 break
             else:
                 break
         for k in range(1, RULE + 1):
-            if (row + k >= SIZE or col - k < 0): break
-            if (self.board[row + k][col - k] == prevTurn):
+            if row + k >= SIZE or col - k < 0:
+                break
+            if self.board[row + k][col - k] == prevTurn:
                 cnt += 1
-            elif (self.board[row + k][col - k] == curTurn):
+            elif self.board[row + k][col - k] == curTurn:
                 tail = True
                 break
             else:
                 break
-        if (tail and head):
+        if tail and head:
             return False
-        elif (cnt == RULE):
+        elif cnt == RULE:
             return True
         else:
             return False
-    def check_win(self,prevMove,prevTurn,curTurn):
-        row,col= prevMove
-        if(self.checkVertical(row,col,prevTurn,curTurn) or self.checkHorizontal(row,col,prevTurn,curTurn) or self.checkMajorDiagonal(row,col,prevTurn,curTurn) or self.checkMinorDiagonal(row,col,prevTurn,curTurn)):
+
+    def check_win(self, prevMove, prevTurn, curTurn):
+        row, col = prevMove
+        if (
+            self.checkVertical(row, col, prevTurn, curTurn)
+            or self.checkHorizontal(row, col, prevTurn, curTurn)
+            or self.checkMajorDiagonal(row, col, prevTurn, curTurn)
+            or self.checkMinorDiagonal(row, col, prevTurn, curTurn)
+        ):
             return prevTurn
         else:
             for i in range(SIZE):
                 for j in range(SIZE):
-                    if (self.board[i][j] == '0'): return 'continue'
-        return 'draw'
+                    if self.board[i][j] == "0":
+                        return "continue"
+        return "draw"
 
 
 def make_empty_board(sz):
@@ -200,43 +394,48 @@ def make_empty_board(sz):
         board.append(["0"] * sz)
     return board
 
+
 def is_empty(board):
-    '''
+    """
     Kiểm tra xem board có rỗng không
-    '''
-    return board == [['0'] * len(board)] * len(board)
+    """
+    return board == [["0"] * len(board)] * len(board)
 
 
 def is_in(board, y, x):
-    '''
+    """
     Kiểm tra vị trí có tọa độ (x,y) có tồn tại trong board không
-    '''
+    """
     return 0 <= y < len(board) and 0 <= x < len(board)
 
 
 def march(board, y, x, dy, dx, length):
-    '''
+    """
     tìm kiếm vị trí xa nhất trong khoảng length
-    '''
+    """
     yf = y + length * dy
     xf = x + length * dx
-    
+
     while not is_in(board, yf, xf):
         yf -= dy
         xf -= dx
 
     return yf, xf
 
+
 def all_moves(board):
-    taken=[]
+    taken = []
     for i in range(len(board)):
         for j in range(len(board)):
-            if(board[i][j]=="0"): taken.append((i,j))
+            if board[i][j] == "0":
+                taken.append((i, j))
     return taken
+
+
 def possible_moves(board):
-    '''
+    """
     Tìm kiếm các nước đi có thể đi( các nước cách những nước đã đánh trong phạm vi nhất định)
-    '''
+    """
     # mảng taken lưu giá trị của người chơi và của máy trên bàn cờ
     taken = []
     # mảng directions lưu hướng đi (8 hướng)
@@ -246,11 +445,11 @@ def possible_moves(board):
 
     for i in range(len(board)):
         for j in range(len(board)):
-            if board[i][j] != '0':
+            if board[i][j] != "0":
                 taken.append((i, j))
-    ''' duyệt trong hướng đi và mảng giá trị trên bàn cờ của người chơi và máy, kiểm tra nước không thể đi(trùng với 
+    """ duyệt trong hướng đi và mảng giá trị trên bàn cờ của người chơi và máy, kiểm tra nước không thể đi(trùng với 
     nước đã có trên bàn cờ)
-    '''
+    """
     for direction in directions:
         dy, dx = direction
         for coord in taken:
@@ -261,11 +460,12 @@ def possible_moves(board):
                     cord.append(move)
     return cord
 
+
 def count_list_strategic_roads(strategic_roads):
-    '''
+    """
     Hệ thống các đường chiến lược
 
-    '''
+    """
     list_strategic_road = {0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, -1: {}}
     for key in strategic_roads:
         for road in strategic_roads[key]:
@@ -278,9 +478,9 @@ def count_list_strategic_roads(strategic_roads):
 
 
 def list_road_of_player(sumcol):
-    '''
+    """
     hợp nhất điểm của mỗi hướng
-    '''
+    """
 
     for key in sumcol:
         if key == 5:
@@ -290,11 +490,11 @@ def list_road_of_player(sumcol):
 
 
 def score_of_list(lis, player):
-    '''
+    """
     Trả về các trường hợp chiến lược để chiến thắng
     ví dụ 1: là  001000
-    '''
-    blank = lis.count('0')
+    """
+    blank = lis.count("0")
     filled = lis.count(player)
 
     if blank + filled < 5:
@@ -306,10 +506,10 @@ def score_of_list(lis, player):
 
 
 def convert_row_to_list(board, y, x, dy, dx, yf, xf):
-    '''
+    """
     trả về list của y,x từ yf,xf
 
-    '''
+    """
     row = []
     while y != yf + dy or x != xf + dx:
         row.append(board[y][x])
@@ -319,10 +519,10 @@ def convert_row_to_list(board, y, x, dy, dx, yf, xf):
 
 
 def score_of_row(board, cordi, dy, dx, cordf, player):
-    '''
+    """
     trả về một list với mỗi phần tử đại diện cho số điểm của 5 khối
 
-    '''
+    """
     strategicRoad = []
     y, x = cordi
     yf, xf = cordf
@@ -330,55 +530,109 @@ def score_of_row(board, cordi, dy, dx, cordf, player):
     # print("score", row)
 
     for start in range(len(row) - 4):
-        road = score_of_list(row[start:start + 5], player)
+        road = score_of_list(row[start : start + 5], player)
         strategicRoad.append(road)
 
     return strategicRoad
 
 
 def score_of_board(board, player):
-    '''
+    """
     tính toán điểm số mỗi hướng của player dùng cho is_win;
-    '''
+    """
 
     f = len(board)
     # scores của 4 hướng đi
     scores = {(0, 1): [], (-1, 1): [], (1, 0): [], (1, 1): []}
     for start in range(len(board)):
-        scores[(0, 1)].extend(score_of_row(board, (start, 0), 0, 1, (start, f - 1), player))
-        scores[(1, 0)].extend(score_of_row(board, (0, start), 1, 0, (f - 1, start), player))
-        scores[(1, 1)].extend(score_of_row(board, (start, 0), 1, 1, (f - 1, f - 1 - start), player))
-        scores[(-1, 1)].extend(score_of_row(board, (start, 0), -1, 1, (0, start), player))
+        scores[(0, 1)].extend(
+            score_of_row(board, (start, 0), 0, 1, (start, f - 1), player)
+        )
+        scores[(1, 0)].extend(
+            score_of_row(board, (0, start), 1, 0, (f - 1, start), player)
+        )
+        scores[(1, 1)].extend(
+            score_of_row(board, (start, 0), 1, 1, (f - 1, f - 1 - start), player)
+        )
+        scores[(-1, 1)].extend(
+            score_of_row(board, (start, 0), -1, 1, (0, start), player)
+        )
 
         if start + 1 < len(board):
-            scores[(1, 1)].extend(score_of_row(board, (0, start + 1), 1, 1, (f - 2 - start, f - 1), player))
-            scores[(-1, 1)].extend(score_of_row(board, (f - 1, start + 1), -1, 1, (start + 1, f - 1), player))
+            scores[(1, 1)].extend(
+                score_of_row(
+                    board, (0, start + 1), 1, 1, (f - 2 - start, f - 1), player
+                )
+            )
+            scores[(-1, 1)].extend(
+                score_of_row(
+                    board, (f - 1, start + 1), -1, 1, (start + 1, f - 1), player
+                )
+            )
 
     return count_list_strategic_roads(scores)
 
 
 def score_of_ceil(board, player, y, x):
-    '''
+    """
     trả lại điểm số của playerumn trong y,x theo 4 hướng,
     key: điểm số khối đơn vị đó -> chỉ ktra 5 khối thay vì toàn bộ
-    '''
+    """
 
     scores = {(0, 1): [], (-1, 1): [], (1, 0): [], (1, 1): []}
 
-    scores[(0, 1)].extend(score_of_row(board, march(board, y, x, 0, -1, 4), 0, 1, march(board, y, x, 0, 1, 4), player))
+    scores[(0, 1)].extend(
+        score_of_row(
+            board,
+            march(board, y, x, 0, -1, 4),
+            0,
+            1,
+            march(board, y, x, 0, 1, 4),
+            player,
+        )
+    )
 
-    scores[(1, 0)].extend(score_of_row(board, march(board, y, x, -1, 0, 4), 1, 0, march(board, y, x, 1, 0, 4), player))
+    scores[(1, 0)].extend(
+        score_of_row(
+            board,
+            march(board, y, x, -1, 0, 4),
+            1,
+            0,
+            march(board, y, x, 1, 0, 4),
+            player,
+        )
+    )
 
-    scores[(1, 1)].extend(score_of_row(board, march(board, y, x, -1, -1, 4), 1, 1, march(board, y, x, 1, 1, 4), player))
+    scores[(1, 1)].extend(
+        score_of_row(
+            board,
+            march(board, y, x, -1, -1, 4),
+            1,
+            1,
+            march(board, y, x, 1, 1, 4),
+            player,
+        )
+    )
 
-    scores[(-1, 1)].extend(score_of_row(board, march(board, y, x, -1, 1, 4), 1, -1, march(board, y, x, 1, -1, 4), player))
+    scores[(-1, 1)].extend(
+        score_of_row(
+            board,
+            march(board, y, x, -1, 1, 4),
+            1,
+            -1,
+            march(board, y, x, 1, -1, 4),
+            player,
+        )
+    )
 
     return count_list_strategic_roads(scores)
+
+
 def checkRoad34(road3, road4):
-    '''
+    """
     trả lại trường hợp chắc chắn có thể thắng(4 ô liên tiếp)
     kiểm tra nước đôi chắc chắn thắng
-    '''
+    """
     for key4 in road4:
         if road4[key4] >= 1:
             for key3 in road3:
@@ -387,12 +641,11 @@ def checkRoad34(road3, road4):
     return False
 
 
-
 def calc_score(board, player, rival, y, x):
-    '''
+    """
     cố gắng di chuyển y,x
-    trả về điểm số tượng trưng lợi thế 
-    '''
+    trả về điểm số tượng trưng lợi thế
+    """
 
     M = 1000
     res, adv, dis = 0, 0, 0
@@ -406,7 +659,13 @@ def calc_score(board, player, rival, y, x):
     adv += a * M
     list_road_of_player(road_of_player)
     # {0: 0, 1: 15, 2: 0, 3: 0, 4: 0, 5: 0, -1: 0}
-    adv += road_of_player[-1] + road_of_player[1] + 4 * road_of_player[2] + 8 * road_of_player[3] + 16 * road_of_player[4]
+    adv += (
+        road_of_player[-1]
+        + road_of_player[1]
+        + 4 * road_of_player[2]
+        + 8 * road_of_player[3]
+        + 16 * road_of_player[4]
+    )
 
     # phòng thủ
     board[y][x] = rival
@@ -414,23 +673,33 @@ def calc_score(board, player, rival, y, x):
     d = winning_situation(road_of_rival)
     dis += d * (M - 100)
     list_road_of_player(road_of_rival)
-    dis += road_of_rival[-1] + road_of_rival[1] + 4 * road_of_rival[2] + 8 * road_of_rival[3] + 16 * road_of_rival[4]
+    dis += (
+        road_of_rival[-1]
+        + road_of_rival[1]
+        + 4 * road_of_rival[2]
+        + 8 * road_of_rival[3]
+        + 16 * road_of_rival[4]
+    )
 
     res = adv + dis
 
-    board[y][x] = '0'
+    board[y][x] = "0"
     return res
+
+
 def winning_situation(road_of_player):
-    '''
+    """
     trả lại tình huống chiến thắng dạng như:
     {0: {}, 1: {(0, 1): 4, (-1, 1): 3, (1, 0): 4, (1, 1): 4}, 2: {}, 3: {}, 4: {}, 5: {}, -1: {}}
     1-5 lưu điểm có độ nguy hiểm từ thấp đến cao,
     -1 là rơi vào trạng thái tồi, cần phòng thủ
-    '''
+    """
 
     if 1 in road_of_player[5].values():
         return 5
-    elif len(road_of_player[4]) >= 2 or (len(road_of_player[4]) >= 1 and max(road_of_player[4].values()) >= 2):
+    elif len(road_of_player[4]) >= 2 or (
+        len(road_of_player[4]) >= 1 and max(road_of_player[4].values()) >= 2
+    ):
         return 4
     elif checkRoad34(road_of_player[3], road_of_player[4]):
         return 4
@@ -443,24 +712,24 @@ def winning_situation(road_of_player):
 
 def best_move(board, player):
     global COUNTNODE
-    COUNTNODE=0
-    '''
+    COUNTNODE = 0
+    """
     trả lại điểm số của mảng trong lợi thế của từng màu
-    '''
-    if player == 'w':
-        rival = 'b'
+    """
+    if player == "w":
+        rival = "b"
     else:
-        rival = 'w'
+        rival = "w"
 
     movePlayer = (0, 0)
     # curScore=float('-inf')
-    maxscore = float('-inf')
-    # kiểm tra nếu bàn cờ rỗng thì cho vị trí random nếu không thì đưa ra giá trị trên bàn cờ nên đi 
+    maxscore = float("-inf")
+    # kiểm tra nếu bàn cờ rỗng thì cho vị trí random nếu không thì đưa ra giá trị trên bàn cờ nên đi
     if is_empty(board):
-        movePlayer = (SIZE/2,SIZE/2)
+        movePlayer = (SIZE / 2, SIZE / 2)
     else:
         moves = possible_moves(board)
-        COUNTNODE=len(moves)
+        COUNTNODE = len(moves)
 
         for move in moves:
             y, x = move
@@ -470,73 +739,79 @@ def best_move(board, player):
                 movePlayer = move
     return movePlayer
 
-def draw_img( y, x,curnTurn):
+
+def draw_img(y, x, curnTurn):
     posx = x * CEIL
     posy = y * CEIL
-    if (curnTurn == HUMAN):
-        screen.blit(ximg, (posy,posx))
+    if curnTurn == HUMAN:
+        screen.blit(ximg, (posy, posx))
     else:
-        screen.blit(oimg, ( posy,posx))
+        screen.blit(oimg, (posy, posx))
     pygame.display.update()
+
+
 def get_position():
-        '''
-        lấy vị trí người vừa đánh trên bàn cờ
-        return (x,y)
-        '''  
-        x,y = pygame.mouse.get_pos()
-        x = math.floor(x / CEIL)
-        y = math.floor(y / CEIL)
-        # print(y,x)
-        return (x,y)
+    """
+    lấy vị trí người vừa đánh trên bàn cờ
+    return (x,y)
+    """
+    x, y = pygame.mouse.get_pos()
+    x = math.floor(x / CEIL)
+    y = math.floor(y / CEIL)
+    # print(y,x)
+    return (x, y)
+
 
 def draw_grid():
-        '''
-        vẽ bàn cờ
-        '''
-        screen.fill(BACKGROUND)
-        x = 0
-        y = 0
-        for l in range(SIZE):
-            x += CEIL
-            y += CEIL
-            pygame.draw.line(screen, LINE_COLOR, (x, 0), (x, WIDTH), 2)
-            pygame.draw.line(screen, LINE_COLOR, (0, y), (HEIGHT, y), 2)
+    """
+    vẽ bàn cờ
+    """
+    screen.fill(BACKGROUND)
+    x = 0
+    y = 0
+    for l in range(SIZE):
+        x += CEIL
+        y += CEIL
+        pygame.draw.line(screen, LINE_COLOR, (x, 0), (x, WIDTH), 2)
+        pygame.draw.line(screen, LINE_COLOR, (0, y), (HEIGHT, y), 2)
+
 
 # minimax kết hợp sử dụng hàm heuristic 8 hướng, đánh giá trạng thái của bàn
+
+
 def evaluateState(board):
-    splitSymbol=';'
-    rem=''
+    splitSymbol = ";"
+    rem = ""
     # check dọc và ngang
     for i in range(SIZE):
         for j in range(SIZE):
-            rem+=board[i][j]
-        rem+=splitSymbol
+            rem += board[i][j]
+        rem += splitSymbol
         for j in range(SIZE):
-            rem+=board[j][i]
-        rem+=splitSymbol 
+            rem += board[j][i]
+        rem += splitSymbol
     # check nửa trên đường chéo phải
-    for i in range(SIZE-4):
-        for j in range(SIZE-i):
-            rem+=board[j][i+j]
-        rem+=splitSymbol  
+    for i in range(SIZE - 4):
+        for j in range(SIZE - i):
+            rem += board[j][i + j]
+        rem += splitSymbol
     # check nửa dưới đường chéo phải
-    for i in range(SIZE-5):
-        for j in range(SIZE-i):
-            rem+=board[i+j][j]
-        rem+=splitSymbol      
-    # check nửa trên đường chéo trái 
+    for i in range(SIZE - 5):
+        for j in range(SIZE - i):
+            rem += board[i + j][j]
+        rem += splitSymbol
+    # check nửa trên đường chéo trái
     for i in range(4, SIZE):
         for j in range(i + 1):
             rem += board[i - j][j]
         rem += splitSymbol
 
-    # check nửa dưới đường chéo trái 
+    # check nửa dưới đường chéo trái
     for i in range(SIZE - 5, 0, -1):
         for j in range(SIZE - 1, i - 1, -1):
             rem += board[j][i + SIZE - j - 1]
         rem += splitSymbol
-    
-    
+
     find1 = ""
     find2 = ""
     score = 0
@@ -549,132 +824,178 @@ def evaluateState(board):
         score -= point[i] * rem.count(find2)  # trừ đi điểm lượng giá của User
 
     return score
- 
+
+
 def is_win(board):
-    human = score_of_board(board, HUMAN)
-    ai = score_of_board(board, AI)
+    splitSymbol = ";"
+    rem = ""
+    # check dọc và ngang
+    for i in range(SIZE):
+        for j in range(SIZE):
+            rem += board[i][j]
+        rem += splitSymbol
+        for j in range(SIZE):
+            rem += board[j][i]
+        rem += splitSymbol
+    # check nửa trên đường chéo phải
+    for i in range(SIZE - 4):
+        for j in range(SIZE - i):
+            rem += board[j][i + j]
+        rem += splitSymbol
+    # check nửa dưới đường chéo phải
+    for i in range(SIZE - 5):
+        for j in range(SIZE - i):
+            rem += board[i + j][j]
+        rem += splitSymbol
+    # check nửa trên đường chéo trái
+    for i in range(4, SIZE):
+        for j in range(i + 1):
+            rem += board[i - j][j]
+        rem += splitSymbol
 
-    list_road_of_player(human)
-    list_road_of_player(ai)
+    # check nửa dưới đường chéo trái
+    for i in range(SIZE - 5, 0, -1):
+        for j in range(SIZE - 1, i - 1, -1):
+            rem += board[j][i + SIZE - j - 1]
+        rem += splitSymbol
 
-    if 5 in human and human[5] == 1:
-        return HUMAN
-    elif 5 in ai and ai[5] == 1:
-        return AI
+    find1 = ""
+    find2 = ""
+    score = 0
+    winCaseHuman = ["bbbbb0", "0bbbbb", "bbbbbb"]
+    winCaseAI = ["wwwww0", "0wwwww", "wwwwww"]
+    # Tính điểm của trạng thái
+    for i in range(len(winCaseHuman)):
+        find1 = winCaseHuman[i]  # duyệt những đường chiến lược của AI
+        find2 = winCaseAI[i]  # duyệt những đường chiến lược của User
+        if rem.count(find1):
+            print("human")
+            return HUMAN
+        if rem.count(find2):
+            print("ai")
+            return AI
 
-    if sum(human.values()) == human[-1] and sum(ai.values()) == ai[-1] or possible_moves(board) == []:
-        return DRAW
+    for i in range(SIZE):
+        for j in range(SIZE):
+            if board[i][j] == "0":
+                return "Continue playing"
+    return DRAW
 
-    return 'Continue playing'
 
 # ----------------------------------------------------------------
 # hàm minimax kết hợp tri thức bổ sung
+
+
 def min_value(board, depth):
     global COUNTNODE
     winner = is_win(board)
     # print("winner min",winner)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
-    if (depth >= 3):
-        state=evaluateState(board)
+    if depth >= 3:
+        state = evaluateState(board)
         # print("state",state)
         return state
-    bestScore = float('inf')
+    bestScore = float("inf")
 
     moves = possible_moves(board)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =HUMAN
-            tempScore =  max_value(board,depth+1)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = HUMAN
+            tempScore = max_value(board, depth + 1)
             if tempScore < bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
+            board[y][x] = "0"
     return bestScore
-def max_value(board,depth):
+
+
+def max_value(board, depth):
     global COUNTNODE
     winner = is_win(board)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
 
-    if (depth >= 3):
-        state=evaluateState(board)
+    if depth >= 3:
+        state = evaluateState(board)
         # print("state",state)
         return state
-    bestScore = float('-inf')
+    bestScore = float("-inf")
 
     moves = possible_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =AI
-            tempScore = min_value(board, depth+1)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = AI
+            tempScore = min_value(board, depth + 1)
             if tempScore > bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            
+            board[y][x] = "0"
+
     return bestScore
+
 
 def minimax(board):
     global COUNTNODE
-    COUNTNODE=0
-    curTurn=AI
+    COUNTNODE = 0
+    curTurn = AI
     winner = is_win(board)
     # print("winner min",winner)
 
-    bestScore = float('-inf')
-    bestMove=(-1,-1)
+    bestScore = float("-inf")
+    bestMove = (-1, -1)
     moves = possible_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =curTurn
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = curTurn
             tempScore = min_value(board, 2)
             if tempScore > bestScore:
                 bestScore = tempScore
-                bestMove=move
-            board[y][x] ='0'
+                bestMove = move
+            board[y][x] = "0"
     return bestMove
-def find_minimax(x,y):
-    global board,win
 
-    if not is_in(board, y, x) or board[y][x] != '0':
+
+def find_minimax(x, y):
+    global board, win
+
+    if not is_in(board, y, x) or board[y][x] != "0":
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == "0":
         draw_img(x, y, HUMAN)
         board[y][x] = HUMAN
-
 
         move_history.append((x, y))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
 
         ay, ax = minimax(board)
         print(ay, ax)
-        draw_img(ax,ay, AI)
+        draw_img(ax, ay, AI)
         board[ay][ax] = AI
         # print("board",board)
         pprint(board)
@@ -682,127 +1003,139 @@ def find_minimax(x,y):
         move_history.append((ax, ay))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
+
+
 # ----------------------------------------------------------------
 # hàm minimax kết hợp alpha beta và tri thức bổ sung
-def min_value_ab(board, depth,alpha,beta):
+
+
+def min_value_ab(board, depth, alpha, beta):
     global COUNTNODE
     winner = is_win(board)
     # print("winner min",winner)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
-    if (depth >= 3):
-        state=evaluateState(board)
+    if depth >= 3:
+        state = evaluateState(board)
         # print("state",state)
         return state
-    bestScore = float('inf')
+    bestScore = float("inf")
 
     moves = possible_moves(board)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =HUMAN
-            tempScore =  max_value_ab(board,depth+1,alpha,beta)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = HUMAN
+            tempScore = max_value_ab(board, depth + 1, alpha, beta)
             if tempScore < bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            beta=min(beta,bestScore)
-            if(beta<=alpha): break
+            board[y][x] = "0"
+            beta = min(beta, bestScore)
+            if beta <= alpha:
+                break
     return bestScore
-def max_value_ab(board,depth,alpha,beta):
+
+
+def max_value_ab(board, depth, alpha, beta):
     global COUNTNODE
     winner = is_win(board)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
 
-    if (depth >= 3):
-        state=evaluateState(board)
+    if depth >= 3:
+        state = evaluateState(board)
         # print("state",state)
         return state
-    bestScore = float('-inf')
+    bestScore = float("-inf")
 
     moves = possible_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =AI
-            tempScore = min_value_ab(board, depth+1,alpha,beta)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = AI
+            tempScore = min_value_ab(board, depth + 1, alpha, beta)
             if tempScore > bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            alpha=max(alpha,bestScore)
-            if(beta<=alpha): break
-            
+            board[y][x] = "0"
+            alpha = max(alpha, bestScore)
+            if beta <= alpha:
+                break
+
     return bestScore
 
 
 def minimax_ab(board):
     global COUNTNODE
-    COUNTNODE=0
-    alpha=float('-inf')
-    beta=float('inf')
-    curTurn=AI
+    COUNTNODE = 0
+    alpha = float("-inf")
+    beta = float("inf")
+    curTurn = AI
     winner = is_win(board)
     # print("winner min",winner)
 
-    bestScore = float('-inf')
-    bestMove=(-1,-1)
+    bestScore = float("-inf")
+    bestMove = (-1, -1)
     moves = possible_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =curTurn
-            tempScore = min_value_ab(board, 2,alpha,beta)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = curTurn
+            tempScore = min_value_ab(board, 2, alpha, beta)
             if tempScore > bestScore:
                 bestScore = tempScore
-                bestMove=move
-            board[y][x] ='0'
-            alpha=max(alpha,bestScore)
-            if(beta<=alpha): break
+                bestMove = move
+            board[y][x] = "0"
+            alpha = max(alpha, bestScore)
+            if beta <= alpha:
+                break
     return bestMove
-# Tìm kiếm với tri thức bổ sung kết hợp minimax  
-def find_minimax_ab(x,y):
-    global board,win
 
-    if not is_in(board, y, x) or board[y][x] != '0':
+
+# Tìm kiếm với tri thức bổ sung kết hợp minimax
+
+
+def find_minimax_ab(x, y):
+    global board, win
+
+    if not is_in(board, y, x) or board[y][x] != "0":
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == "0":
         draw_img(x, y, HUMAN)
         board[y][x] = HUMAN
-
 
         move_history.append((x, y))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
 
         ay, ax = minimax_ab(board)
         print(ay, ax)
-        draw_img(ax,ay, AI)
+        draw_img(ax, ay, AI)
         board[ay][ax] = AI
         # print("board",board)
         pprint(board)
@@ -810,382 +1143,422 @@ def find_minimax_ab(x,y):
         move_history.append((ax, ay))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
+
+
 #  Tìm kiếm với tri thức bổ sung
-def heuristic(x,y):
+
+
+def heuristic(x, y):
     global board
-    if not is_in(board, y, x) or board[y][x] != '0':
+    if not is_in(board, y, x) or board[y][x] != "0":
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == "0":
         draw_img(x, y, HUMAN)
-        board[y][x] = 'b'
-
+        board[y][x] = "b"
 
         move_history.append((x, y))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
 
-        ay, ax = best_move(board,AI)
+        ay, ax = best_move(board, AI)
         print(ay, ax)
-        draw_img(ax,ay, AI)
-        board[ay][ax] = 'w'
+        draw_img(ax, ay, AI)
+        board[ay][ax] = "w"
         # print("board",board)
         pprint(board)
 
         move_history.append((ax, ay))
 
         game_res = is_win(board)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
+
+
 # def minimax_not_heuristic():
-def min_value_not_heuristic(board,move, depth):
+
+
+def min_value_not_heuristic(board, move, depth):
     global COUNTNODE
-    winner = CheckState(board).check_win(move,AI,HUMAN)
+    winner = CheckState(board).check_win(move, AI, HUMAN)
     # print("winner min",winner)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
     # if (depth >= 3):
     #     state=evaluateState(board)
     #     print("state",state)
     #     return state
-    bestScore = float('inf')
+    bestScore = float("inf")
 
     moves = all_moves(board)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =HUMAN
-            tempScore =  max_value_not_heuristic(board,move,depth+1)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = HUMAN
+            tempScore = max_value_not_heuristic(board, move, depth + 1)
             if tempScore < bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
+            board[y][x] = "0"
     return bestScore
-def max_value_not_heuristic(board,move,depth):
+
+
+def max_value_not_heuristic(board, move, depth):
     global COUNTNODE
-    winner = CheckState(board).check_win(move,HUMAN,AI)
-    if(winner==AI):
+    winner = CheckState(board).check_win(move, HUMAN, AI)
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
 
     # if (depth >= 3):
     #     state=evaluateState(board)
     #     print("state",state)
     #     return state
-    bestScore = float('-inf')
+    bestScore = float("-inf")
 
     moves = all_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =AI
-            tempScore = min_value_not_heuristic(board,move, depth+1)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = AI
+            tempScore = min_value_not_heuristic(board, move, depth + 1)
             if tempScore > bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            
+            board[y][x] = "0"
+
     return bestScore
+
 
 def minimax_not_heuristic(board):
     global COUNTNODE
     COUNTNODE = 0
-    bestScore = float('-inf')
-    bestMove=(-1,-1)
+    bestScore = float("-inf")
+    bestMove = (-1, -1)
     moves = all_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            y,x = move
-            COUNTNODE+=1
-            board[y][x] =AI
-            tempScore = min_value_not_heuristic(board,move, 2)
+            y, x = move
+            COUNTNODE += 1
+            board[y][x] = AI
+            tempScore = min_value_not_heuristic(board, move, 2)
             if tempScore > bestScore:
                 bestScore = tempScore
-                bestMove=move
-            board[y][x] ='0'
+                bestMove = move
+            board[y][x] = "0"
     return bestMove
-def not_heuristic(x,y):
+
+
+def not_heuristic(x, y):
     global board
-   
-    if not is_in(board, y, x) or board[y][x] != '0':
+
+    if not is_in(board, y, x) or board[y][x] != "0":
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == "0":
         draw_img(x, y, HUMAN)
-        board[y][x] = 'b'
-
+        board[y][x] = "b"
 
         move_history.append((x, y))
 
-        game_res = CheckState(board).check_win((y,x),HUMAN,AI)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        game_res = CheckState(board).check_win((y, x), HUMAN, AI)
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
 
         ay, ax = minimax_not_heuristic(board)
         print(ay, ax)
-        draw_img(ax,ay, AI)
-        board[ay][ax] = 'w'
+        draw_img(ax, ay, AI)
+        board[ay][ax] = "w"
         # print("board",board)
 
         pprint(board)
 
         move_history.append((ax, ay))
-        game_res = CheckState(board).check_win((ay,ax),AI,HUMAN)
-        print("game_res",game_res)
+        game_res = CheckState(board).check_win((ay, ax), AI, HUMAN)
+        print("game_res", game_res)
         # pprint(board)
-        if game_res in [ HUMAN,AI,DRAW]:
+        if game_res in [HUMAN, AI, DRAW]:
             print_game(game_res)
             return
 
 
-
 # def minimax_not_heuristic():
-def min_value_ab_not_heuristic(board,move, depth,alpha,beta):
+def min_value_ab_not_heuristic(board, move, depth, alpha, beta):
     global COUNTNODE
-    winner = CheckState(board).check_win(move,AI,HUMAN)
+    winner = CheckState(board).check_win(move, AI, HUMAN)
     # print("winner min",winner)
-    if(winner==AI):
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
     # if (depth >= 3):
     #     state=evaluateState(board)
     #     print("state",state)
     #     return state
-    bestScore = float('inf')
+    bestScore = float("inf")
 
     moves = all_moves(board)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =HUMAN
-            tempScore =  max_value_ab_not_heuristic(board,move,depth+1,alpha,beta)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = HUMAN
+            tempScore = max_value_ab_not_heuristic(board, move, depth + 1, alpha, beta)
             if tempScore < bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            beta=min(beta,bestScore)
-            if(beta<=alpha): break
+            board[y][x] = "0"
+            beta = min(beta, bestScore)
+            if beta <= alpha:
+                break
     return bestScore
-def max_value_ab_not_heuristic(board,move,depth,alpha,beta):
+
+
+def max_value_ab_not_heuristic(board, move, depth, alpha, beta):
     global COUNTNODE
-    winner = CheckState(board).check_win(move,HUMAN,AI)
-    if(winner==AI):
+    winner = CheckState(board).check_win(move, HUMAN, AI)
+    if winner == AI:
         return 100000
-    elif(winner==HUMAN):
+    elif winner == HUMAN:
         return -100000
-    elif(winner==DRAW):
+    elif winner == DRAW:
         return 0
 
     # if (depth >= 3):
     #     state=evaluateState(board)
     #     print("state",state)
     #     return state
-    bestScore = float('-inf')
+    bestScore = float("-inf")
 
     moves = all_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            COUNTNODE+=1
-            y,x = move
-            board[y][x] =AI
-            tempScore = min_value_ab_not_heuristic(board,move, depth+1,alpha,beta)
+            COUNTNODE += 1
+            y, x = move
+            board[y][x] = AI
+            tempScore = min_value_ab_not_heuristic(board, move, depth + 1, alpha, beta)
             if tempScore > bestScore:
                 bestScore = tempScore
-            board[y][x] ='0'
-            alpha=max(alpha,bestScore)
-            if(beta<=alpha): break
-            
+            board[y][x] = "0"
+            alpha = max(alpha, bestScore)
+            if beta <= alpha:
+                break
+
     return bestScore
+
 
 def minimax_ab_not_heuristic(board):
     global COUNTNODE
-    COUNTNODE=0
-    alpha=float('-inf')
-    beta=float('inf')
-    bestScore = float('-inf')
-    bestMove=(-1,-1)
+    COUNTNODE = 0
+    alpha = float("-inf")
+    beta = float("inf")
+    bestScore = float("-inf")
+    bestMove = (-1, -1)
     moves = all_moves(board)
     # pprint(moves)
     if is_empty(board):
-        bestMove = (SIZE/2,SIZE/2)
+        bestMove = (SIZE / 2, SIZE / 2)
     else:
         for move in moves:
-            y,x = move
-            COUNTNODE+=1
-            board[y][x] =AI
-            tempScore = min_value_ab_not_heuristic(board,move, 2,alpha,beta)
+            y, x = move
+            COUNTNODE += 1
+            board[y][x] = AI
+            tempScore = min_value_ab_not_heuristic(board, move, 2, alpha, beta)
             if tempScore > bestScore:
                 bestScore = tempScore
-                bestMove=move
-            board[y][x] ='0'
-            alpha=max(alpha,bestScore)
-            if(beta<=alpha): break
+                bestMove = move
+            board[y][x] = "0"
+            alpha = max(alpha, bestScore)
+            if beta <= alpha:
+                break
     return bestMove
-def ab_not_heuristic(x,y):
+
+
+def ab_not_heuristic(x, y):
     global board
-   
-    if not is_in(board, y, x) or board[y][x] != '0':
+
+    if not is_in(board, y, x) or board[y][x] != "0":
         return
 
-    if board[y][x] == '0':
+    if board[y][x] == "0":
         draw_img(x, y, HUMAN)
-        board[y][x] = 'b'
-
+        board[y][x] = "b"
 
         move_history.append((x, y))
 
-        game_res = CheckState(board).check_win((y,x),HUMAN,AI)
-        if game_res in [ HUMAN,AI,DRAW]:
-            print_game(game_res) 
+        game_res = CheckState(board).check_win((y, x), HUMAN, AI)
+        if game_res in [HUMAN, AI, DRAW]:
+            print_game(game_res)
             return
 
         ay, ax = minimax_ab_not_heuristic(board)
         print(ay, ax)
-        draw_img(ax,ay, AI)
-        board[ay][ax] = 'w'
+        draw_img(ax, ay, AI)
+        board[ay][ax] = "w"
         # print("board",board)
 
         pprint(board)
 
         move_history.append((ax, ay))
-        game_res = CheckState(board).check_win((ay,ax),AI,HUMAN)
-        print("game_res",game_res)
+        game_res = CheckState(board).check_win((ay, ax), AI, HUMAN)
+        print("game_res", game_res)
         # pprint(board)
-        if game_res in [ HUMAN,AI,DRAW]:
+        if game_res in [HUMAN, AI, DRAW]:
             print_game(game_res)
             return
 
-import button
-font = pygame.font.SysFont('Georgia', 15)
-minimax_heuristic = button.button(WIDTH /2, HEIGHT /2 - 50, font, 'Minimax+ heuristic')
-minimax_alpha_beta_heuristic= button.button(WIDTH /2, HEIGHT /2 , font, 'Minimax +alpha beta heuristic')
-heuristic_button = button.button(WIDTH /2, HEIGHT /2 +50 , font, 'heuristic')
-minimax_button = button.button(WIDTH /2, HEIGHT /2 -150 , font, 'minimax')
-minimax_alpha_beta_button = button.button(WIDTH /2, HEIGHT /2 -100 , font, 'minimax alpha beta')
+
+font = pygame.font.SysFont("Georgia", 15)
+minimax_heuristic = button.button(
+    WIDTH / 2, HEIGHT / 2 - 50, font, "Minimax+ heuristic"
+)
+minimax_alpha_beta_heuristic = button.button(
+    WIDTH / 2, HEIGHT / 2, font, "Minimax +alpha beta heuristic"
+)
+heuristic_button = button.button(WIDTH / 2, HEIGHT / 2 + 50, font, "heuristic")
+minimax_button = button.button(WIDTH / 2, HEIGHT / 2 - 150, font, "minimax")
+minimax_alpha_beta_button = button.button(
+    WIDTH / 2, HEIGHT / 2 - 100, font, "minimax alpha beta"
+)
 bg = pygame.image.load("images/bg.jpg")
+
+
 def print_game(winner):
     global win
-    if winner==HUMAN: winner='human '
-    if winner==AI: winner='ai '
-    congra = button.button(HEIGHT /2, WIDTH /2, font, winner+"won")    
+    if winner == HUMAN:
+        winner = "human "
+    if winner == AI:
+        winner = "ai "
+    congra = button.button(HEIGHT / 2, WIDTH / 2, font, winner + "won")
     congra.draw_button(screen)
-    win=True
+    win = True
+
+
 def initialize():
-    mode=1    
-    global board,win
-    board=make_empty_board(SIZE)
+    mode = 1
+    global board, win
+    board = make_empty_board(SIZE)
     draw_grid()
     run = True
     # global playing
     playing = False
     drawGridCkeck = False
-    while run:  
+    while run:
         for event in pygame.event.get():
             if drawGridCkeck:
-                drawGridCkeck=False
+                drawGridCkeck = False
                 draw_grid()
-            if(playing):
-                if (event.type == pygame.MOUSEBUTTONDOWN):
-                    x,y=get_position()
-                    if(win): break
-                    if(mode==1) :
+            if playing:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = get_position()
+                    if win:
+                        break
+                    if mode == 1:
                         startTime = time.time()
-                        not_heuristic(x,y)
+                        not_heuristic(x, y)
                         endTime = time.time()
                         print("Thinking time ", endTime - startTime)
-                        print("COUNT node",COUNTNODE)
+                        print("COUNT node", COUNTNODE)
+                        input_detail.append([COUNTNODE, endTime - startTime])
 
-                    elif(mode==2) :
-                        startTime=time.time()
-                        ab_not_heuristic(x,y)
-                        endTime=time.time()
-                        print("Thinking time",endTime-startTime)
-                        print("COUNT node",COUNTNODE)
-                    elif(mode==3) :
-                        startTime=time.time()
-                        find_minimax(x,y)
-                        endTime=time.time()
-                        print("Thinking time",endTime-startTime)
-                        print("COUNT node",COUNTNODE)
-                    elif(mode==4) :
-                        startTime=time.time()
-                        find_minimax_ab(x,y)
-                        endTime=time.time()
-                        print("Thinking time",endTime-startTime)
-                        print("COUNT node",COUNTNODE)
-                    elif(mode==5) :
-                        startTime=time.time()
-                        heuristic(x,y)
-                        endTime=time.time()
-                        print("Thinking time",endTime-startTime)
-                        print("COUNT node",COUNTNODE)
-                    print("click",x,y)
+                    elif mode == 2:
+                        startTime = time.time()
+                        ab_not_heuristic(x, y)
+                        endTime = time.time()
+                        print("Thinking time", endTime - startTime)
+                        print("COUNT node", COUNTNODE)
+                        input_detail.append([COUNTNODE, endTime - startTime])
+                    elif mode == 3:
+                        startTime = time.time()
+                        find_minimax(x, y)
+                        endTime = time.time()
+                        print("Thinking time", endTime - startTime)
+                        print("COUNT node", COUNTNODE)
+                        input_detail.append([COUNTNODE, endTime - startTime])
+                    elif mode == 4:
+                        startTime = time.time()
+                        find_minimax_ab(x, y)
+                        endTime = time.time()
+                        print("Thinking time", endTime - startTime)
+                        print("COUNT node", COUNTNODE)
+                        input_detail.append([COUNTNODE, endTime - startTime])
+                    elif mode == 5:
+                        startTime = time.time()
+                        heuristic(x, y)
+                        endTime = time.time()
+                        print("Thinking time", endTime - startTime)
+                        print("COUNT node", COUNTNODE)
+                        input_detail.append([COUNTNODE, endTime - startTime])
+                    print("click", x, y)
             else:
-                
                 screen.blit(bg, (0, 0))
                 if minimax_button.draw_button(screen):
                     playing = True
-                    mode=1
-                    drawGridCkeck=True
-                    print('minimax')
+                    mode = 1
+                    drawGridCkeck = True
+                    print("minimax")
+                    output_excel_path = "minimax.xlsx"
                 if minimax_alpha_beta_button.draw_button(screen):
-                    print('minimax alpha beta')
+                    print("minimax alpha beta")
                     playing = True
-                    mode=2
-                    drawGridCkeck=True
+                    mode = 2
+                    drawGridCkeck = True
+                    output_excel_path = "minimax_alpha_beta.xlsx"
                 if minimax_heuristic.draw_button(screen):
                     playing = True
-                    mode=3
-                    drawGridCkeck=True
-                    print('heuristic + minimax')
-                    drawGridCkeck=True
+                    mode = 3
+                    drawGridCkeck = True
+                    print("heuristic + minimax")
+                    output_excel_path = "heuristic_minimax.xlsx"
+                    drawGridCkeck = True
                 if minimax_alpha_beta_heuristic.draw_button(screen):
                     playing = True
-                    mode=4
-                    drawGridCkeck=True
-                    print('minimax alpha beta heuristic')
+                    mode = 4
+                    drawGridCkeck = True
+                    output_excel_path = "minimax_alpha_beta_heuristic.xlsx"
+                    print("minimax alpha beta heuristic")
                 if heuristic_button.draw_button(screen):
                     playing = True
-                    mode=5
-                    drawGridCkeck=True
-                    print('heuristic')
-
+                    mode = 5
+                    drawGridCkeck = True
+                    print("heuristic")
+                    output_excel_path = "heuristic.xlsx"
             if event.type == pygame.QUIT:
+                output_Excel(input_detail, output_excel_path)
                 pygame.quit()
                 quit()
 
         pygame.display.update()
-        clock.tick(30) 
+        clock.tick(30)
+
 
 initialize()

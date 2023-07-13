@@ -1,0 +1,34 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+def plot_bar_chart_from_excel(file_path):
+    # Đọc dữ liệu từ tệp Excel
+    # header=0 để chỉ định rằng tiêu đề là dòng đầu tiên
+    df = pd.read_excel(file_path, header=0)
+
+    # Lấy danh sách các cột
+    columns = df.columns.tolist()   
+
+    # Vẽ đồ thị cột cho mỗi cột dữ liệu
+    for column in columns:
+        # Lấy tiêu đề của cột
+        title = df[column][0]
+
+        # Lấy dữ liệu cột (loại bỏ tiêu đề)
+        data = df[column][1:]
+
+        # Vẽ đồ thị cột
+        plt.bar(data.index, data)
+
+        # Thiết lập tiêu đề và nhãn trục
+        plt.title(title)
+        plt.xlabel('Index')
+        plt.ylabel('Value')
+
+        # Hiển thị đồ thị cột
+        plt.show()
+
+
+file_path = 'E:\TTNT\caro\Danh_gia_AI.xlsx'
+plot_bar_chart_from_excel(file_path)

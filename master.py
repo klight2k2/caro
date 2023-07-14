@@ -39,20 +39,20 @@ AI = "w"
 DRAW = "draw"
 
 # config ban co cho  danh 5
-# WIDTH = 480
-# HEIGHT = 480
-# CEIL = 48
-# SIZE = 10
-# RULE = 5
-# COUNTNODE = 0
-
-# config ban co cho danh 3
-COUNTNODE=0
 WIDTH = 480
 HEIGHT = 480
-CEIL=160
-SIZE=3
-RULE=3
+CEIL = 48
+SIZE = 10
+RULE = 5
+COUNTNODE = 0
+
+# config ban co cho danh 3
+# COUNTNODE=0
+# WIDTH = 480
+# HEIGHT = 480
+# CEIL=160
+# SIZE=3
+# RULE=3
 # COUNTNODE=0
 
 
